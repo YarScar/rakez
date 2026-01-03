@@ -18,7 +18,7 @@ export default function NoteMatchActivity() {
   const [showCatMemePrompt, setShowCatMemePrompt] = useState(false);
   const [showCatMemeModal, setShowCatMemeModal] = useState(false);
   const [currentCatMeme, setCurrentCatMeme] = useState(null);
-  const [usedCatMemes, setUsedCatMemes] = useState([]);
+  const [shownCatImages, setShownCatImages] = useState([]);
   
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -55,26 +55,48 @@ export default function NoteMatchActivity() {
   };
 
   const getRandomCatMeme = () => {
-    // Randomly select from the available cat memes
-    const allCatMemes = ['image.png', 'image-1.png', 'image-2.png'];
+    // Combine local images and API images
+    const localImages = [
+      '/cat-memes/image.png',
+      '/cat-memes/image-1.png',
+      '/cat-memes/image-2.png'
+    ];
     
-    // Filter out already used memes
-    let availableMemes = allCatMemes.filter(meme => !usedCatMemes.includes(meme));
+    // Add 5 API images with unique identifiers
+    const apiImages = [
+      `https://cataas.com/cat?id=1&${Date.now()}`,
+      `https://cataas.com/cat?id=2&${Date.now()}`,
+      `https://cataas.com/cat?id=3&${Date.now()}`,
+      `https://cataas.com/cat?id=4&${Date.now()}`,
+      `https://cataas.com/cat?id=5&${Date.now()}`
+    ];
     
-    // If all memes have been shown, reset the used list
-    if (availableMemes.length === 0) {
-      setUsedCatMemes([]);
-      availableMemes = [...allCatMemes];
+    const allImages = [...localImages, ...apiImages];
+    
+    // Filter out already shown images
+    let availableImages = allImages.filter((img, index) => {
+      // For API images, check by index since URL has timestamp
+      const imageKey = img.startsWith('http') ? `api-${index}` : img;
+      return !shownCatImages.includes(imageKey);
+    });
+    
+    // If all images have been shown, reset
+    if (availableImages.length === 0) {
+      setShownCatImages([]);
+      availableImages = [...allImages];
     }
     
-    // Select random meme from available ones
-    const randomIndex = Math.floor(Math.random() * availableMemes.length);
-    const selectedMeme = availableMemes[randomIndex];
+    // Select random image from available ones
+    const randomIndex = Math.floor(Math.random() * availableImages.length);
+    const selectedImage = availableImages[randomIndex];
     
-    // Mark this meme as used
-    setUsedCatMemes(prev => [...prev, selectedMeme]);
+    // Mark this image as shown
+    const imageKey = selectedImage.startsWith('http') 
+      ? `api-${allImages.indexOf(availableImages[randomIndex])}`
+      : selectedImage;
+    setShownCatImages(prev => [...prev, imageKey]);
     
-    return `/cat-memes/${selectedMeme}`;
+    return selectedImage;
   };
 
   // Musical notes frequencies (C major scale)
@@ -352,7 +374,7 @@ export default function NoteMatchActivity() {
     }
     setShowNotification(true);
     
-    // Show cat meme prompt after points notification if they earned points
+    // Show cat png prompt after points notification if they earned points
     if (finalScore > 0) {
       setTimeout(() => {
         setCurrentCatMeme(getRandomCatMeme());
@@ -643,7 +665,7 @@ export default function NoteMatchActivity() {
         </div>
       )}
 
-      {/* Cat Meme Prompt */}
+      {/* Cat png Prompt */}
       {showCatMemePrompt && !showCatMemeModal && (
         <div 
           onClick={() => {
@@ -670,14 +692,14 @@ export default function NoteMatchActivity() {
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ fontSize: "2rem" }}>🐱</span>
             <div>
-              <div style={{ fontWeight: 700, fontSize: "1.1rem" }}>You earned a cat meme!</div>
+              <div style={{ fontWeight: 700, fontSize: "1.1rem" }}>You earned a cat image!</div>
               <div style={{ fontSize: "0.875rem", opacity: 0.9, marginTop: 4 }}>Click to open</div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Cat Meme Modal */}
+      {/* Cat image Modal */}
       {showCatMemeModal && currentCatMeme && (
         <div 
           onClick={() => {
@@ -735,10 +757,10 @@ export default function NoteMatchActivity() {
             >
               ×
             </button>
-            <h2 style={{ marginBottom: 16, color: "#1f2937" }}>🎉 Your Cat Meme Reward!</h2>
+            <h2 style={{ marginBottom: 16, color: "#1f2937" }}>🎉 Your Image Reward!</h2>
             <img 
               src={currentCatMeme} 
-              alt="Cat Meme Reward" 
+              alt="Cat Image Reward" 
               style={{ 
                 width: "100%", 
                 borderRadius: 12,

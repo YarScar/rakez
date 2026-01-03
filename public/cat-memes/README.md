@@ -1,6 +1,6 @@
-# Cat Memes
+# Cat png
 
-Place your cat meme PNG files here with names like:
+Place your cat PNG files here with names like:
 - cat-meme-1.png![alt text](image.png)
 - cat-meme-2.png ![alt text](image-1.png)
 - cat-meme-3.png ![alt text](image-2.png)
