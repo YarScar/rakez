@@ -27,7 +27,16 @@ export default function TasksPage() {
     const localImages = [
       '/cat-memes/image.png',
       '/cat-memes/image-1.png',
-      '/cat-memes/image-2.png'
+      '/cat-memes/image-2.png',
+      '/cat-memes/image-3.png',
+      '/cat-memes/image-4.png',
+      '/cat-memes/image-5.png',
+      '/cat-memes/image-6.png',
+      '/cat-memes/image-7.png',
+      '/cat-memes/image-8.png',
+      '/cat-memes/image-9.png',
+      '/cat-memes/image-10.png',
+      '/cat-memes/image-11.png'
     ];
     
     // Add 5 API images with unique identifiers
