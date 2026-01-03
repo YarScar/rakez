@@ -7,18 +7,20 @@ datasource db {
 }
 
 model User {
-  id           Int               @id @default(autoincrement())
-  name         String
-  email        String            @unique
-  password     String
-  createdAt    DateTime          @default(now())
-  role         Role              @default(USER)
-  updatedAt    DateTime          @updatedAt
-  achievements Achievement[]
-  sessions     ActivitySession[]
-  adminLogs    AdminLog[]
-  preference   Preference?
-  tasks        Task[]
+  id             Int               @id @default(autoincrement())
+  name           String
+  email          String            @unique
+  password       String
+  createdAt      DateTime          @default(now())
+  role           Role              @default(USER)
+  updatedAt      DateTime          @updatedAt
+  points         Int               @default(0)
+  tasksCompleted Int               @default(0)
+  achievements   Achievement[]
+  sessions       ActivitySession[]
+  adminLogs      AdminLog[]
+  preference     Preference?
+  tasks          Task[]
 }
 
 model Preference {

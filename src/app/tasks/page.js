@@ -29,6 +29,8 @@ export default function TasksPage() {
           currentStreak: data.streak || 0,
           totalPoints: data.points || 0,
         });
+      } else {
+        console.error("Failed to load tasks:", data.error);
       }
     } catch (error) {
       console.error("Failed to fetch tasks:", error);
@@ -55,6 +57,10 @@ export default function TasksPage() {
         setNewTaskTitle("");
         setNewTaskDescription("");
         fetchTasks();
+      } else {
+        const data = await res.json();
+        console.error("Failed to create task:", data.error);
+        alert("Failed to create task. Please try again.");
       }
     } catch (error) {
       console.error("Failed to create task:", error);
@@ -94,10 +100,16 @@ export default function TasksPage() {
       });
 
       if (res.ok) {
+        console.log(`Task ${taskId} deleted successfully`);
         fetchTasks();
+      } else {
+        const data = await res.json();
+        console.error("Failed to delete task:", data.error);
+        alert("Failed to delete task: " + (data.error || "Unknown error"));
       }
     } catch (error) {
       console.error("Failed to delete task:", error);
+      alert("Failed to delete task. Please try again.");
     }
   };
 

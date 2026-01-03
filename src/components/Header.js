@@ -36,7 +36,7 @@ export default function Header() {
 
       if (response.ok) {
         setUser(null);
-        router.push("/demo");
+        router.push("/");
       }
     } catch (error) {
       console.error("Logout failed:", error);

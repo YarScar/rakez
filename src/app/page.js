@@ -9,10 +9,10 @@ export default function Home() {
           <h1>🖐️ Rakez</h1>
           <p className="subtitle">
             A hand-based wellness app designed for <strong>overwhelmed students and young professionals</strong> who 
-            need quick mental resets without adding another task to their day.
+            need quick mental resets, while keeping you on task.
           </p>
           <div className="cta">
-            <Link className="button primary" href="/dashboard">Try the App</Link>
+            <Link className="button primary" href="/demo">Try the App</Link>
             <Link className="button" href="/about">Learn More</Link>
           </div>
         </div>

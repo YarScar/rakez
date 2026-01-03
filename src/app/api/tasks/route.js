@@ -28,17 +28,23 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const tasks = await prisma.task.findMany({
-      where: { userId },
-      orderBy: [
-        { completed: "asc" },
-        { createdAt: "desc" },
-      ],
-    });
+    const [tasks, user] = await Promise.all([
+      prisma.task.findMany({
+        where: { userId },
+        orderBy: [
+          { completed: "asc" },
+          { createdAt: "desc" },
+        ],
+      }),
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { points: true, tasksCompleted: true },
+      }),
+    ]);
 
     // Calculate stats
-    const completedCount = tasks.filter((t) => t.completed).length;
-    const points = completedCount * 10; // 10 points per completed task
+    const completedCount = user?.tasksCompleted || 0; // Use permanent counter from User model
+    const points = user?.points || 0; // Use stored points from User model
 
     // Calculate streak (simplified - could be enhanced with date-based logic)
     const recentCompletions = tasks.filter((t) => 
@@ -83,6 +89,7 @@ export async function POST(req) {
       },
     });
 
+    console.log(`Task created for user ${userId}:`, task.id);
     return NextResponse.json({ task });
   } catch (error) {
     console.error("Create task error:", error);
@@ -110,6 +117,7 @@ export async function PATCH(req) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
 
+    // Update task
     const task = await prisma.task.update({
       where: { id },
       data: {
@@ -119,7 +127,37 @@ export async function PATCH(req) {
     });
 
     // Calculate points earned (10 points per task)
-    const pointsEarned = completed ? 10 : 0;
+    const pointsEarned = completed && !existingTask.completed ? 10 : 0;
+
+    // Update user points if task was just completed
+    if (pointsEarned > 0) {
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          points: {
+            increment: pointsEarned,
+          },
+          tasksCompleted: {
+            increment: 1,
+          },
+        },
+        select: { points: true, tasksCompleted: true },
+      });
+      console.log(`User ${userId} earned ${pointsEarned} points. Total: ${updatedUser.points}, Tasks completed: ${updatedUser.tasksCompleted}`);
+    }
+
+    // If uncompleting a task, deduct points but don't touch tasksCompleted counter
+    if (!completed && existingTask.completed) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          points: {
+            decrement: 10,
+          },
+          // Note: We do NOT decrement tasksCompleted - it only goes up
+        },
+      });
+    }
 
     return NextResponse.json({ task, pointsEarned });
   } catch (error) {
@@ -152,9 +190,14 @@ export async function DELETE(req) {
       where: { id },
     });
 
+    console.log(`Task ${id} deleted for user ${userId}. Completed status was: ${existingTask.completed}`);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete task error:", error);
-    return NextResponse.json({ error: "Failed to delete task" }, { status: 500 });
+    console.error("Error stack:", error.stack);
+    return NextResponse.json({ 
+      error: "Failed to delete task",
+      details: error.message 
+    }, { status: 500 });
   }
 }
