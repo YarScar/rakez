@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import BackButton from "@/components/BackButton";
 
 const demoActivities = [
   { name: "Finger Music", type: "FINGER_MUSIC", description: "Tap gestures to play sounds" },
@@ -12,6 +13,7 @@ const demoActivities = [
 export default function ActivitiesPage() {
   return (
     <main className="container stack">
+      <BackButton href="/dashboard" label="Back to Dashboard" />
       <h2>Activities</h2>
       <div className="card-grid">
         {demoActivities.map((a, i) => (

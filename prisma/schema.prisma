@@ -18,6 +18,7 @@ model User {
   sessions     ActivitySession[]
   adminLogs    AdminLog[]
   preference   Preference?
+  tasks        Task[]
 }
 
 model Preference {
@@ -85,6 +86,19 @@ model AdminLog {
   adminUser   User      @relation(fields: [adminUserId], references: [id])
 
   @@index([adminUserId])
+}
+
+model Task {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String?
+  completed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 enum Role {

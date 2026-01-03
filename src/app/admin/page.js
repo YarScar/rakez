@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import BackButton from "@/components/BackButton";
 
 export default function AdminDashboard() {
   const [metrics, setMetrics] = useState(null);
@@ -26,6 +27,7 @@ export default function AdminDashboard() {
 
   return (
     <main className="container" style={{ maxWidth: 1200 }}>
+      <BackButton href="/dashboard" label="Back to Dashboard" />
       <section style={{ marginBottom: 32 }}>
         <h1>🛡️ Admin Overview</h1>
         <p style={{ color: "var(--muted)" }}>Monitor user engagement and app performance</p>

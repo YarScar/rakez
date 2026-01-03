@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import BackButton from "@/components/BackButton";
 
 export default function FingerMusicActivity() {
   const router = useRouter();
@@ -63,6 +64,7 @@ export default function FingerMusicActivity() {
 
   return (
     <main className="container" style={{ maxWidth: 900 }}>
+      <BackButton href="/activities" label="Back to Activities" />
       {/* Activity Header */}
       <section style={{ marginBottom: 24, textAlign: "center" }}>
         <h1>🎵 Finger Music</h1>

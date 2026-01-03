@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import BackButton from "@/components/BackButton";
 
 const toneOptions = ["CALM", "ENERGETIC", "HUMOROUS", "SUPPORTIVE"];
 const energyOptions = ["LOW", "MEDIUM", "HIGH"];
@@ -7,6 +9,7 @@ const movementOptions = ["LOW", "MEDIUM", "HIGH"];
 const careerOptions = ["STUDENT", "EARLY_CAREER", "MID_CAREER", "SENIOR"];
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [pref, setPref] = useState({
@@ -46,8 +49,24 @@ export default function SettingsPage() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        router.push("/demo");
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+      setStatus("Logout failed");
+    }
+  };
+
   return (
     <main className="container stack" style={{ maxWidth: 800 }}>
+      <BackButton href="/dashboard" label="Back to Dashboard" />
       <h2>Settings</h2>
       <section className="card">
         <h3>Profile</h3>
@@ -88,6 +107,16 @@ export default function SettingsPage() {
           <button className="primary" onClick={savePrefs}>Save Preferences</button>
           <span>{status}</span>
         </div>
+      </section>
+
+      <section className="card" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+        <h3>Account</h3>
+        <p style={{ color: 'var(--muted)', marginTop: 8, marginBottom: 16 }}>
+          Sign out of your account
+        </p>
+        <button className="button logout-btn" onClick={handleLogout} style={{ width: 'fit-content' }}>
+          Logout
+        </button>
       </section>
     </main>
   );

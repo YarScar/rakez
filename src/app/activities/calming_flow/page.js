@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import BackButton from "@/components/BackButton";
 
 export default function CalmingFlowActivity() {
   const router = useRouter();
@@ -65,6 +66,7 @@ export default function CalmingFlowActivity() {
 
   return (
     <main className="container" style={{ maxWidth: 900 }}>
+      <BackButton href="/activities" label="Back to Activities" />
       <section style={{ marginBottom: 24, textAlign: "center" }}>
         <h1>🌊 Calming Flow</h1>
         <p style={{ color: "var(--muted)" }}>

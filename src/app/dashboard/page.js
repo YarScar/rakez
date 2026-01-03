@@ -35,6 +35,7 @@ export default function DashboardPage() {
       <section style={{ marginTop: 24 }}>
         <h3>Daily Activities</h3>
         <div style={{ display: "flex", gap: 12 }}>
+          <Link href="/tasks">My Tasks</Link>
           <Link href="/activities">Go to Activities</Link>
           <Link href="/progress">View Progress</Link>
           <Link href="/settings">Settings</Link>
