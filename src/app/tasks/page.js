@@ -13,10 +13,59 @@ export default function TasksPage() {
     currentStreak: 0,
     totalPoints: 0,
   });
+  const [showCatImagePrompt, setShowCatImagePrompt] = useState(false);
+  const [showCatImageModal, setShowCatImageModal] = useState(false);
+  const [currentCatImage, setCurrentCatImage] = useState(null);
+  const [shownCatImages, setShownCatImages] = useState([]);
 
   useEffect(() => {
     fetchTasks();
   }, []);
+
+  const getRandomCatImage = () => {
+    // Combine local images and API images
+    const localImages = [
+      '/cat-memes/image.png',
+      '/cat-memes/image-1.png',
+      '/cat-memes/image-2.png'
+    ];
+    
+    // Add 5 API images with unique identifiers
+    const apiImages = [
+      `https://cataas.com/cat?id=1&${Date.now()}`,
+      `https://cataas.com/cat?id=2&${Date.now()}`,
+      `https://cataas.com/cat?id=3&${Date.now()}`,
+      `https://cataas.com/cat?id=4&${Date.now()}`,
+      `https://cataas.com/cat?id=5&${Date.now()}`
+    ];
+    
+    const allImages = [...localImages, ...apiImages];
+    
+    // Filter out already shown images
+    let availableImages = allImages.filter((img, index) => {
+      // For API images, check by index since URL has timestamp
+      const imageKey = img.startsWith('http') ? `api-${index}` : img;
+      return !shownCatImages.includes(imageKey);
+    });
+    
+    // If all images have been shown, reset
+    if (availableImages.length === 0) {
+      setShownCatImages([]);
+      availableImages = [...allImages];
+    }
+    
+    // Select random image from available ones
+    const randomIndex = Math.floor(Math.random() * availableImages.length);
+    const selectedImage = availableImages[randomIndex];
+    
+    // Mark this image as shown
+    const imageKey = selectedImage.startsWith('http') 
+      ? `api-${allImages.indexOf(availableImages[randomIndex])}`
+      : selectedImage;
+    setShownCatImages(prev => [...prev, imageKey]);
+    
+    return selectedImage;
+  };
 
   const fetchTasks = async () => {
     try {
@@ -128,6 +177,12 @@ export default function TasksPage() {
     `;
     document.body.appendChild(notification);
     setTimeout(() => notification.remove(), 3000);
+    
+    // Show cat image prompt after points notification
+    setTimeout(() => {
+      setCurrentCatImage(getRandomCatImage());
+      setShowCatImagePrompt(true);
+    }, 3500);
   };
 
   const getBadgeForCount = (count) => {
@@ -323,6 +378,150 @@ export default function TasksPage() {
           View Progress Dashboard
         </Link>
       </section>
+
+      {/* Cat Image Prompt */}
+      {showCatImagePrompt && !showCatImageModal && (
+        <div 
+          onClick={() => {
+            setShowCatImageModal(true);
+            setShowCatImagePrompt(false);
+          }}
+          style={{
+            position: "fixed",
+            top: 24,
+            right: 24,
+            background: "linear-gradient(135deg, #f59e0b, #d97706)",
+            color: "white",
+            padding: "20px 24px",
+            borderRadius: 12,
+            boxShadow: "0 8px 24px rgba(245, 158, 11, 0.4)",
+            zIndex: 1000,
+            cursor: "pointer",
+            transition: "transform 0.2s",
+            maxWidth: "300px"
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+          onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: "2rem" }}>🐱</span>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: "1.1rem" }}>You earned a cat image!</div>
+              <div style={{ fontSize: "0.875rem", opacity: 0.9, marginTop: 4 }}>Click to open</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cat Image Modal */}
+      {showCatImageModal && currentCatImage && (
+        <div 
+          onClick={() => {
+            setShowCatImageModal(false);
+            setShowCatImagePrompt(false);
+          }}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 2000,
+            padding: 20
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "white",
+              borderRadius: 16,
+              padding: 24,
+              maxWidth: 500,
+              width: "100%",
+              maxHeight: "90vh",
+              overflow: "auto",
+              position: "relative"
+            }}
+          >
+            <button
+              onClick={() => {
+                setShowCatImageModal(false);
+                setShowCatImagePrompt(false);
+              }}
+              style={{
+                position: "absolute",
+                top: 16,
+                right: 16,
+                background: "#ef4444",
+                color: "white",
+                border: "none",
+                borderRadius: 8,
+                width: 32,
+                height: 32,
+                fontSize: "1.2rem",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+              ×
+            </button>
+            <h2 style={{ marginBottom: 16, color: "#1f2937" }}>🎉 Your Cat Image Reward!</h2>
+            <img 
+              src={currentCatImage} 
+              alt="Cat Image Reward" 
+              style={{ 
+                width: "100%", 
+                borderRadius: 12,
+                marginBottom: 16
+              }}
+            />
+            <div style={{ display: "flex", gap: 12 }}>
+              <a 
+                href={currentCatImage} 
+                download={`rakez-cat-reward-${Date.now()}.png`}
+                style={{
+                  flex: 1,
+                  textAlign: "center",
+                  padding: "12px 24px",
+                  background: "linear-gradient(135deg, #10b981, #059669)",
+                  borderRadius: 8,
+                  textDecoration: "none",
+                  color: "white",
+                  fontSize: "1rem",
+                  fontWeight: 600
+                }}
+              >
+                💾 Save Image
+              </a>
+              <button
+                onClick={() => {
+                  setShowCatImageModal(false);
+                  setShowCatImagePrompt(false);
+                }}
+                style={{
+                  flex: 1,
+                  padding: "12px 24px",
+                  background: "#6b7280",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 8,
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  cursor: "pointer"
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
