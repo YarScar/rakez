@@ -3,6 +3,7 @@ import Link from "next/link";
 import BackButton from "@/components/BackButton";
 
 const demoActivities = [
+  { name: "Note Match Challenge", type: "NOTE_MATCH", description: "Match musical notes with hand gestures" },
   { name: "Finger Music", type: "FINGER_MUSIC", description: "Tap gestures to play sounds" },
   { name: "Calming Flow", type: "CALMING_FLOW", description: "Breathing + slow hand motions" },
   { name: "Energy Boost", type: "ENERGY_BOOST", description: "Fast gestures to build energy" },

@@ -54,9 +54,8 @@ export async function GET() {
     }
 
     // Calculate statistics with safe defaults
-    const activityPoints = (sessions || []).reduce((acc, s) => acc + (s.points || 0), 0);
-    const taskPoints = user.points || 0;
-    const combinedPoints = activityPoints + taskPoints;
+    // User.points now contains all points (from both tasks and activities)
+    const totalPoints = user.points || 0;
 
     const completedSessions = (sessions || []).filter(s => s.completedAt).length;
     const completedTasks = user.tasksCompleted || 0;
@@ -197,9 +196,7 @@ export async function GET() {
     return NextResponse.json({
       user,
       stats: {
-        totalPoints: combinedPoints,
-        activityPoints: activityPoints,
-        taskPoints: taskPoints,
+        totalPoints: totalPoints,
         streak: currentStreak,
         completedSessions,
         completedTasks,

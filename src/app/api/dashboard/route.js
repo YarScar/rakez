@@ -24,10 +24,8 @@ export async function GET(req) {
       }),
     ]);
 
-    // Calculate points from both activities and tasks
-    const activityPoints = sessions.reduce((acc, s) => acc + (s.points || 0), 0);
-    const taskPoints = user?.points || 0;
-    const totalPoints = activityPoints + taskPoints;
+    // User.points now contains all points (tasks + activities)
+    const totalPoints = user?.points || 0;
     
     // Calculate streak (consecutive days with activity)
     let streak = 0;
@@ -66,8 +64,6 @@ export async function GET(req) {
       user, 
       stats: { 
         points: totalPoints,
-        activityPoints,
-        taskPoints,
         streak, 
         energyLevel, 
         totalActivities,

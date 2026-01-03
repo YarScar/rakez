@@ -10,6 +10,31 @@ export default function DemoPage() {
   ]);
   const [demoPoints, setDemoPoints] = useState(20);
   const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationTitle, setNotificationTitle] = useState("");
+
+  // Encouraging messages for notifications
+  const encouragingMessages = [
+    "Amazing Work!",
+    "You're Crushing It!",
+    "Fantastic Job!",
+    "Keep It Up!",
+    "You're On Fire!",
+    "Incredible!",
+    "Outstanding!",
+    "Brilliant!",
+    "Excellent Work!",
+    "You're A Star!",
+    "Way To Go!",
+    "Superb!",
+    "Phenomenal!",
+    "You Rock!",
+    "Killing It!"
+  ];
+
+  const getRandomEncouragement = () => {
+    return encouragingMessages[Math.floor(Math.random() * encouragingMessages.length)];
+  };
   
   // Hand activity demo state
   const [activityActive, setActivityActive] = useState(false);
@@ -31,6 +56,7 @@ export default function DemoPage() {
   const lastMatchTimeRef = useRef(0);
   const hasMatchedCurrentTargetRef = useRef(false);
   const targetNoteRef = useRef(null);
+  const activityScoreRef = useRef(0);
 
   // Musical notes frequencies (C major scale)
   const notes = {
@@ -95,7 +121,6 @@ export default function DemoPage() {
       oscillator.stop(ctx.currentTime + 0.2);
       
       setCurrentNote(noteName);
-      setActivityScore(s => s + 1);
       setActivityFeedback(`♪ ${noteName} note!`);
     } catch (err) {
       console.error("Audio playback error:", err);
@@ -176,8 +201,6 @@ export default function DemoPage() {
       ctx.globalAlpha = 1.0;
       
       const currentTarget = targetNoteRef.current;
-      console.log(`Hand detected at x=${x.toFixed(2)}, zone=${zoneIndex}, note=${noteName}, target=${currentTarget}, matched=${hasMatchedCurrentTargetRef.current}`);
-      console.log(`Comparison: "${noteName}" === "${currentTarget}" ?`, noteName === currentTarget);
       
       // Play note regardless of match
       if (noteName && isProcessingRef.current) {
@@ -185,26 +208,35 @@ export default function DemoPage() {
         
         // Check if the played note matches the target - only allow one match per target
         if (noteName === currentTarget && !hasMatchedCurrentTargetRef.current && currentTarget !== null) {
-          console.log('🎉 MATCH! Score +1');
-          hasMatchedCurrentTargetRef.current = true; // Mark this target as matched immediately
-          setActivityScore(prev => prev + 1);
+          console.log('🎉 MATCH! Note:', noteName, 'Score +1');
+          
+          // Immediately lock this target to prevent multiple points
+          hasMatchedCurrentTargetRef.current = true;
+          const matchedNote = currentTarget; // Store the matched note
+          
+          setActivityScore(prev => {
+            const newScore = prev + 1;
+            activityScoreRef.current = newScore; // Update ref immediately
+            console.log('Score updated from', prev, 'to', newScore);
+            return newScore;
+          });
           setShowMatch(true);
           
           // Show green for 400ms, then immediately switch to new red note
           setTimeout(() => {
-            // Generate new note
+            // Generate new note different from the matched one
             const noteNames = Object.keys(notes);
             let randomNote;
             do {
               randomNote = noteNames[Math.floor(Math.random() * noteNames.length)];
-            } while (randomNote === currentTarget && noteNames.length > 1);
-            console.log('🎯 New target note:', randomNote);
+            } while (randomNote === matchedNote && noteNames.length > 1);
+            console.log('🎯 New target note:', randomNote, '(was', matchedNote, ')');
             
             // Update to new note and turn it red
             targetNoteRef.current = randomNote; // Update ref immediately
             setTargetNote(randomNote);
             setShowMatch(false);
-            hasMatchedCurrentTargetRef.current = false;
+            hasMatchedCurrentTargetRef.current = false; // Allow matching the new note
           }, 400);
         }
       }
@@ -217,6 +249,8 @@ export default function DemoPage() {
     setDemoTasks(prev => prev.map(task => {
       if (task.id === id && !task.completed) {
         setDemoPoints(p => p + 10);
+        setNotificationTitle(getRandomEncouragement());
+        setNotificationMessage("+10 points earned");
         setShowNotification(true);
         setTimeout(() => setShowNotification(false), 2000);
         return { ...task, completed: true };
@@ -271,6 +305,7 @@ export default function DemoPage() {
       
       setActivityActive(true);
       setActivityScore(0);
+      activityScoreRef.current = 0; // Reset ref
       setTimeLeft(30);
       setActivityFeedback("🎵 Match the notes!");
       
@@ -347,11 +382,20 @@ export default function DemoPage() {
       }
     }, 100);
     
-    if (activityScore > 0) {
-      setDemoPoints(p => p + activityScore);
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 2000);
+    // Always show notification with final score
+    const finalScore = activityScoreRef.current;
+    console.log('Activity ended with score:', finalScore);
+    
+    setNotificationTitle(getRandomEncouragement());
+    if (finalScore > 0) {
+      setDemoPoints(p => p + finalScore);
+      setNotificationMessage(`+${finalScore} points earned`);
+    } else {
+      setNotificationMessage("No points earned this time");
     }
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 2000);
+    
     setActivityFeedback("");
     setTimeLeft(30);
     setCurrentNote("");
@@ -572,8 +616,8 @@ export default function DemoPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ fontSize: "1.5rem" }}>🏆</span>
                 <div>
-                  <div style={{ fontWeight: 600 }}>Task Completed!</div>
-                  <div style={{ fontSize: "0.875rem", opacity: 0.9 }}>+10 points earned</div>
+                  <div style={{ fontWeight: 600 }}>{notificationTitle}</div>
+                  <div style={{ fontSize: "0.875rem", opacity: 0.9 }}>{notificationMessage}</div>
                 </div>
               </div>
             </div>
