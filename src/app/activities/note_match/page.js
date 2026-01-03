@@ -15,6 +15,10 @@ export default function NoteMatchActivity() {
   const [showNotification, setShowNotification] = useState(false);
   const [notificationTitle, setNotificationTitle] = useState("");
   const [notificationMessage, setNotificationMessage] = useState("");
+  const [showCatMemePrompt, setShowCatMemePrompt] = useState(false);
+  const [showCatMemeModal, setShowCatMemeModal] = useState(false);
+  const [currentCatMeme, setCurrentCatMeme] = useState(null);
+  const [usedCatMemes, setUsedCatMemes] = useState([]);
   
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -48,6 +52,29 @@ export default function NoteMatchActivity() {
 
   const getRandomEncouragement = () => {
     return encouragingMessages[Math.floor(Math.random() * encouragingMessages.length)];
+  };
+
+  const getRandomCatMeme = () => {
+    // Randomly select from the available cat memes
+    const allCatMemes = ['image.png', 'image-1.png', 'image-2.png'];
+    
+    // Filter out already used memes
+    let availableMemes = allCatMemes.filter(meme => !usedCatMemes.includes(meme));
+    
+    // If all memes have been shown, reset the used list
+    if (availableMemes.length === 0) {
+      setUsedCatMemes([]);
+      availableMemes = [...allCatMemes];
+    }
+    
+    // Select random meme from available ones
+    const randomIndex = Math.floor(Math.random() * availableMemes.length);
+    const selectedMeme = availableMemes[randomIndex];
+    
+    // Mark this meme as used
+    setUsedCatMemes(prev => [...prev, selectedMeme]);
+    
+    return `/cat-memes/${selectedMeme}`;
   };
 
   // Musical notes frequencies (C major scale)
@@ -324,6 +351,14 @@ export default function NoteMatchActivity() {
       setNotificationMessage("No points earned this time");
     }
     setShowNotification(true);
+    
+    // Show cat meme prompt after points notification if they earned points
+    if (finalScore > 0) {
+      setTimeout(() => {
+        setCurrentCatMeme(getRandomCatMeme());
+        setShowCatMemePrompt(true);
+      }, 2500);
+    }
     
     console.log('[Note Match] Sending activity data to API:', { type: 'NOTE_MATCH', points: finalScore, duration: 30 });
     
@@ -603,6 +638,150 @@ export default function NoteMatchActivity() {
             <div>
               <div style={{ fontWeight: 600 }}>{notificationTitle}</div>
               <div style={{ fontSize: "0.875rem", opacity: 0.9 }}>{notificationMessage}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cat Meme Prompt */}
+      {showCatMemePrompt && !showCatMemeModal && (
+        <div 
+          onClick={() => {
+            setShowCatMemeModal(true);
+            setShowCatMemePrompt(false);
+          }}
+          style={{
+            position: "fixed",
+            top: 24,
+            right: 24,
+            background: "linear-gradient(135deg, #f59e0b, #d97706)",
+            color: "white",
+            padding: "20px 24px",
+            borderRadius: 12,
+            boxShadow: "0 8px 24px rgba(245, 158, 11, 0.4)",
+            zIndex: 1000,
+            cursor: "pointer",
+            transition: "transform 0.2s",
+            maxWidth: "300px"
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+          onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: "2rem" }}>🐱</span>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: "1.1rem" }}>You earned a cat meme!</div>
+              <div style={{ fontSize: "0.875rem", opacity: 0.9, marginTop: 4 }}>Click to open</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cat Meme Modal */}
+      {showCatMemeModal && currentCatMeme && (
+        <div 
+          onClick={() => {
+            setShowCatMemeModal(false);
+            setShowCatMemePrompt(false);
+          }}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 2000,
+            padding: 20
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "white",
+              borderRadius: 16,
+              padding: 24,
+              maxWidth: 500,
+              width: "100%",
+              maxHeight: "90vh",
+              overflow: "auto",
+              position: "relative"
+            }}
+          >
+            <button
+              onClick={() => {
+                setShowCatMemeModal(false);
+                setShowCatMemePrompt(false);
+              }}
+              style={{
+                position: "absolute",
+                top: 16,
+                right: 16,
+                background: "#ef4444",
+                color: "white",
+                border: "none",
+                borderRadius: 8,
+                width: 32,
+                height: 32,
+                fontSize: "1.2rem",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+              ×
+            </button>
+            <h2 style={{ marginBottom: 16, color: "#1f2937" }}>🎉 Your Cat Meme Reward!</h2>
+            <img 
+              src={currentCatMeme} 
+              alt="Cat Meme Reward" 
+              style={{ 
+                width: "100%", 
+                borderRadius: 12,
+                marginBottom: 16
+              }}
+            />
+            <div style={{ display: "flex", gap: 12 }}>
+              <a 
+                href={currentCatMeme} 
+                download={`rakez-cat-reward-${Date.now()}.png`}
+                style={{
+                  flex: 1,
+                  textAlign: "center",
+                  padding: "12px 24px",
+                  background: "linear-gradient(135deg, #10b981, #059669)",
+                  borderRadius: 8,
+                  textDecoration: "none",
+                  color: "white",
+                  fontSize: "1rem",
+                  fontWeight: 600
+                }}
+              >
+                💾 Save Meme
+              </a>
+              <button
+                onClick={() => {
+                  setShowCatMemeModal(false);
+                  setShowCatMemePrompt(false);
+                }}
+                style={{
+                  flex: 1,
+                  padding: "12px 24px",
+                  background: "#6b7280",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 8,
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  cursor: "pointer"
+                }}
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
