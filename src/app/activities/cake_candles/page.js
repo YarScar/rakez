@@ -30,6 +30,9 @@ export default function CakeCandlesActivity() {
   const wasPinchingRef = useRef(false);
   const cakeImageRef = useRef(null);
   const candleImageRef = useRef(null);
+  const smoothedCursorRef = useRef(null);
+  const smoothedPinchRef = useRef(null);
+  const SMOOTHING_ALPHA = 0.65; // previous-value weight for low-pass filter
 
   // Available candles state - left side of screen (mutable positions)
   const [availableCandles, setAvailableCandles] = useState([
@@ -339,47 +342,57 @@ export default function CakeCandlesActivity() {
         }
       });
 
-      // Compute cursor position
-      const cursorX = indexTip.x * canvas.width;
-      const cursorY = indexTip.y * canvas.height;
-      setCursorPosition({ x: cursorX, y: cursorY });
+      // Compute raw cursor position (pixels)
+      const rawCursorX = indexTip.x * canvas.width;
+      const rawCursorY = indexTip.y * canvas.height;
 
-      // Use numeric pinch distance with pixel thresholds for robustness
+      // Smooth cursor with simple low-pass filter to reduce jitter
+      const prevCursor = smoothedCursorRef.current;
+      const smX = prevCursor ? (prevCursor.x * SMOOTHING_ALPHA + rawCursorX * (1 - SMOOTHING_ALPHA)) : rawCursorX;
+      const smY = prevCursor ? (prevCursor.y * SMOOTHING_ALPHA + rawCursorY * (1 - SMOOTHING_ALPHA)) : rawCursorY;
+      smoothedCursorRef.current = { x: smX, y: smY };
+      setCursorPosition({ x: smX, y: smY });
+
+      // Use numeric pinch distance with pixel thresholds for robustness and smooth it
       const pinchDistance = getPinchDistance(landmarks); // normalized
       const pixelDistance = pinchDistance * Math.max(canvas.width, canvas.height);
+      const prevPinch = smoothedPinchRef.current;
+      const smoothedPixel = prevPinch ? (prevPinch * SMOOTHING_ALPHA + pixelDistance * (1 - SMOOTHING_ALPHA)) : pixelDistance;
+      smoothedPinchRef.current = smoothedPixel;
+
       const downThresholdPx = 40; // start pinch when fingers are within ~40px
       const upThresholdPx = 60; // release when larger than ~60px
       let isPinching;
       if (wasPinchingRef.current) {
-        isPinching = pixelDistance < upThresholdPx;
+        isPinching = smoothedPixel < upThresholdPx;
       } else {
-        isPinching = pixelDistance < downThresholdPx;
+        isPinching = smoothedPixel < downThresholdPx;
       }
 
-      // Draw cursor
+      // Draw cursor (use smoothed coordinates)
       ctx.beginPath();
-      ctx.arc(cursorX, cursorY, isPinching ? 20 : 15, 0, 2 * Math.PI);
+      ctx.arc(smX, smY, isPinching ? 20 : 15, 0, 2 * Math.PI);
       ctx.fillStyle = isPinching ? 'rgba(255, 0, 255, 0.8)' : 'rgba(59, 130, 246, 0.6)';
       ctx.fill();
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 3;
       ctx.stroke();
 
-      // Draw pinch pixel distance for debugging
+      // Draw smoothed pinch pixel distance for debugging
       ctx.font = '12px Arial';
       ctx.fillStyle = 'rgba(255,255,255,0.95)';
-      ctx.fillText(Math.round(pixelDistance) + 'px', cursorX + 18, cursorY - 18);
+      ctx.fillText(Math.round(smoothedPinchRef.current) + 'px', smX + 18, smY - 18);
 
       // Show dragged candle following the cursor
       const activeDragged = draggedCandleRef.current || draggedCandle;
       if (activeDragged && isPinching) {
         if (candleImageRef.current && candleImageRef.current.complete) {
-          ctx.drawImage(candleImageRef.current, cursorX - 25, cursorY - 50, 50, 70);
+          ctx.drawImage(candleImageRef.current, smX - 25, smY - 50, 50, 70);
         } else {
           ctx.font = '50px Arial';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText('🕯️', cursorX, cursorY - 30);
+          ctx.fillText('🕯️', smX, smY - 30);
         }
       }
 
@@ -387,7 +400,7 @@ export default function CakeCandlesActivity() {
       if (isProcessingRef.current) {
         if (isPinching && !wasPinchingRef.current) {
           wasPinchingRef.current = true;
-          const nearbyCandle = getCandleNearCursor(cursorX, cursorY);
+          const nearbyCandle = getCandleNearCursor(smX, smY);
           if (nearbyCandle) {
             setDraggedCandle(nearbyCandle);
             draggedCandleRef.current = nearbyCandle;
@@ -398,7 +411,7 @@ export default function CakeCandlesActivity() {
           wasPinchingRef.current = false;
           const active = draggedCandleRef.current || draggedCandle;
           if (active) {
-            if (isOverCake(cursorX, cursorY)) {
+            if (isOverCake(smX, smY)) {
               if (candlesPlacedRef.current >= MAX_CANDLES) {
                 setFeedback(`Maximum of ${MAX_CANDLES} candles placed`);
               } else if (placedIdsRef.current.has(active.id)) {
@@ -406,8 +419,8 @@ export default function CakeCandlesActivity() {
               } else {
                 const newCandle = {
                   id: active.id,
-                  x: cursorX,
-                  y: cursorY,
+                  x: smX,
+                  y: smY,
                   rotation: Math.random() * 20 - 10
                 };
                 // lock on cake
@@ -424,7 +437,7 @@ export default function CakeCandlesActivity() {
               }
             } else {
               // Persist new position for the available candle
-              setAvailableCandles(prev => prev.map(c => c.id === active.id ? { ...c, x: cursorX, y: cursorY } : c));
+              setAvailableCandles(prev => prev.map(c => c.id === active.id ? { ...c, x: smX, y: smY } : c));
               setFeedback('Candle moved to new position');
             }
             setDraggedCandle(null);
