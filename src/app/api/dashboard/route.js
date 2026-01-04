@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
+import { getUserFromToken } from "@/lib/auth";
 
 export async function GET(req) {
   try {
@@ -70,6 +71,38 @@ export async function GET(req) {
         totalTasks
       } 
     });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
+
+export async function POST(req) {
+  try {
+    const userId = await getUserFromToken();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const body = await req.json();
+    const { name, email } = body;
+
+    const data = {};
+    if (typeof name === "string") data.name = name;
+    if (typeof email === "string") data.email = email;
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "No data provided" }, { status: 400 });
+    }
+
+    // Attempt update; handle unique email constraint error
+    try {
+      const updated = await prisma.user.update({ where: { id: userId }, data, select: { id: true, name: true, email: true } });
+      return NextResponse.json({ user: updated });
+    } catch (e) {
+      if (e.code === "P2002") {
+        return NextResponse.json({ error: "Email already in use" }, { status: 400 });
+      }
+      throw e;
+    }
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

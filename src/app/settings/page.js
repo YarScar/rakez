@@ -29,23 +29,61 @@ export default function SettingsPage() {
         const json = await res.json();
         if (res.ok) {
           setName(json.user?.name || "");
+          setEmail(json.user?.email || "");
         }
       } catch {}
+    })();
+    // fetch existing preferences to prefill the form
+    (async () => {
+      try {
+        const res = await fetch("/api/survey");
+        if (!res.ok) return;
+        const json = await res.json();
+        if (json.preference) {
+          const p = json.preference;
+          setPref({
+            tone: p.tone || "CALM",
+            energyLevel: p.energyLevel || "MEDIUM",
+            movementComfort: p.movementComfort || "MEDIUM",
+            careerStage: p.careerStage || "STUDENT",
+            biggestStruggle: p.biggestStruggle || "",
+          });
+        }
+      } catch (e) {
+        // ignore
+      }
     })();
   }, []);
 
   const savePrefs = async () => {
     setStatus("Saving...");
     try {
+      // First, update profile (name/email)
+      const profileRes = await fetch("/api/dashboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email }),
+      });
+      const profileJson = await profileRes.json().catch(() => ({}));
+      if (!profileRes.ok) {
+        setStatus(profileJson.error || "Failed to save profile");
+        return;
+      }
+
+      // Then save preferences
       const res = await fetch("/api/survey", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pref),
       });
-      if (!res.ok) throw new Error("Failed to save preferences");
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setStatus(json.error || "Failed to save preferences");
+        return;
+      }
       setStatus("Saved preferences");
     } catch (e) {
-      setStatus(e.message);
+      setStatus(e.message || "Save failed");
     }
   };
 
@@ -104,7 +142,7 @@ export default function SettingsPage() {
           <textarea rows={3} value={pref.biggestStruggle} onChange={(e) => setPref({ ...pref, biggestStruggle: e.target.value })} />
         </div>
         <div className="actions" style={{ marginTop: 12 }}>
-          <button className="primary" onClick={savePrefs}>Save Preferences</button>
+          <button className="primary" onClick={savePrefs} disabled={status === "Saving..."}>Save Preferences</button>
           <span>{status}</span>
         </div>
       </section>

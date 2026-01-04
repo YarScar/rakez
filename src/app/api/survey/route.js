@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 const SurveySchema = z.object({
   careerStage: z.enum(["STUDENT", "EARLY_CAREER", "MID_CAREER", "SENIOR"]),
   energyLevel: z.enum(["LOW", "MEDIUM", "HIGH"]),
-  biggestStruggle: z.string().min(2),
+  biggestStruggle: z.string(),
   tone: z.enum(["CALM", "ENERGETIC", "HUMOROUS", "SUPPORTIVE"]),
   movementComfort: z.enum(["LOW", "MEDIUM", "HIGH"]),
 });
@@ -31,6 +31,20 @@ export async function POST(req) {
       create: { userId: payload.sub, ...data },
     });
 
+    return NextResponse.json({ preference: pref });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
+
+export async function GET(req) {
+  try {
+    const token = req.cookies.get("auth")?.value;
+    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+    const pref = await prisma.preference.findUnique({ where: { userId: payload.sub } });
     return NextResponse.json({ preference: pref });
   } catch (e) {
     console.error(e);
