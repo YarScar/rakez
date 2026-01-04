@@ -58,7 +58,7 @@ export const ACTIVITY_TYPES = {
   NOTE_MATCH: 'NOTE_MATCH',
   CAKE_CANDLES: 'CAKE_CANDLES',
   CALMING_FLOW: 'CALMING_FLOW',
-  FINGER_MUSIC: 'FINGER_MUSIC'
+  // FINGER_MUSIC removed from UI; preserved in Prisma enum if needed
 };
 
 // Activity default durations (in seconds)

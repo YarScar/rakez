@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
+import CatImageModal from "@/components/CatImageModal";
 
 export default function CakeCandlesActivity() {
   const router = useRouter();
@@ -307,7 +308,7 @@ export default function CakeCandlesActivity() {
       const indexTip = landmarks[8]; // Index finger tip
 
       // Draw skeleton/connections (same scheme as note_match)
-      ctx.strokeStyle = '#00FFFF';
+      ctx.strokeStyle = '#bc28e9ff';
       ctx.lineWidth = 3;
       const connections = [
         [0,1],[1,2],[2,3],[3,4],
@@ -328,7 +329,7 @@ export default function CakeCandlesActivity() {
       });
 
       // Draw landmarks
-      ctx.fillStyle = '#00FF00';
+      ctx.fillStyle = '#fa78e2ff';
       landmarks.forEach((lm, i) => {
         const x = lm.x * canvas.width;
         const y = lm.y * canvas.height;
@@ -436,7 +437,7 @@ export default function CakeCandlesActivity() {
                 setFeedback('🎉 Candle placed! +1 point');
               }
             } else {
-              // Persist new position for the available candle
+              // new position for the available candle
               setAvailableCandles(prev => prev.map(c => c.id === active.id ? { ...c, x: smX, y: smY } : c));
               setFeedback('Candle moved to new position');
             }
@@ -781,53 +782,14 @@ export default function CakeCandlesActivity() {
           </div>
         )}
 
-        {showCatMemeModal && currentCatMeme && (
-          <div 
-            onClick={() => {
-              setShowCatMemeModal(false);
-              router.push("/activities/complete");
-            }}
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0, 0, 0, 0.9)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 1001,
-              cursor: "pointer",
-              padding: 20
-            }}
-          >
-            <div style={{
-              maxWidth: "90%",
-              maxHeight: "90%",
-              position: "relative"
-            }}>
-              <img 
-                src={currentCatMeme} 
-                alt="Cat Meme" 
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "80vh",
-                  borderRadius: 12,
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.5)"
-                }}
-              />
-              <div style={{
-                position: "absolute",
-                bottom: -60,
-                left: "50%",
-                transform: "translateX(-50%)",
-                color: "white",
-                fontSize: "0.875rem",
-                whiteSpace: "nowrap"
-              }}>
-                Click anywhere to continue
-              </div>
-            </div>
-          </div>
-        )}
+        <CatImageModal
+          open={showCatMemeModal}
+          src={currentCatMeme}
+          onClose={() => {
+            setShowCatMemeModal(false);
+            router.push("/activities/complete");
+          }}
+        />
       </div>
     </main>
   );

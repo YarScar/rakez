@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
+import CatImageModal from "@/components/CatImageModal";
 
 export default function NoteMatchActivity() {
   const router = useRouter();
@@ -30,6 +31,7 @@ export default function NoteMatchActivity() {
   const hasMatchedCurrentTargetRef = useRef(false);
   const targetNoteRef = useRef(null);
   const scoreRef = useRef(0);
+  const redirectAfterModalRef = useRef(false);
 
   // Encouraging messages for notifications
   const encouragingMessages = [
@@ -175,7 +177,7 @@ export default function NoteMatchActivity() {
       const indexTip = landmarks[8];
       
       // Draw connections
-      ctx.strokeStyle = '#00FFFF';
+      ctx.strokeStyle = '#218ed7ff';
       ctx.lineWidth = 3;
       const connections = [
         [0,1],[1,2],[2,3],[3,4],
@@ -196,7 +198,7 @@ export default function NoteMatchActivity() {
       });
       
       // Draw landmarks
-      ctx.fillStyle = '#00FF00';
+      ctx.fillStyle = '#03e184ff';
       landmarks.forEach((landmark, index) => {
         const x = landmark.x * canvas.width;
         const y = landmark.y * canvas.height;
@@ -413,11 +415,9 @@ export default function NoteMatchActivity() {
       console.log('[Note Match] API response data:', data);
       
       if (res.ok) {
-        console.log('[Note Match] Activity saved successfully, redirecting to progress...');
-        // Wait 2 seconds to show notification, then redirect
-        setTimeout(() => {
-          router.push("/progress");
-        }, 2000);
+        console.log('[Note Match] Activity saved successfully; will redirect after reward modal is closed.');
+        // Don't redirect immediately — wait until the user closes the cat image modal
+        redirectAfterModalRef.current = true;
       } else {
         console.error('[Note Match] API error:', data);
       }
@@ -700,114 +700,18 @@ export default function NoteMatchActivity() {
       )}
 
       {/* Cat image Modal */}
-      {showCatMemeModal && currentCatMeme && (
-        <div 
-          onClick={() => {
-            setShowCatMemeModal(false);
-            setShowCatMemePrompt(false);
-          }}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0, 0, 0, 0.8)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 2000,
-            padding: 20
-          }}
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: "white",
-              borderRadius: 16,
-              padding: 24,
-              maxWidth: 500,
-              width: "100%",
-              maxHeight: "90vh",
-              overflow: "auto",
-              position: "relative"
-            }}
-          >
-            <button
-              onClick={() => {
-                setShowCatMemeModal(false);
-                setShowCatMemePrompt(false);
-              }}
-              style={{
-                position: "absolute",
-                top: 16,
-                right: 16,
-                background: "#ef4444",
-                color: "white",
-                border: "none",
-                borderRadius: 8,
-                width: 32,
-                height: 32,
-                fontSize: "1.2rem",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }}
-            >
-              ×
-            </button>
-            <h2 style={{ marginBottom: 16, color: "#1f2937" }}>🎉 Your Image Reward!</h2>
-            <img 
-              src={currentCatMeme} 
-              alt="Cat Image Reward" 
-              style={{ 
-                width: "100%", 
-                borderRadius: 12,
-                marginBottom: 16
-              }}
-            />
-            <div style={{ display: "flex", gap: 12 }}>
-              <a 
-                href={currentCatMeme} 
-                download={`rakez-cat-reward-${Date.now()}.png`}
-                style={{
-                  flex: 1,
-                  textAlign: "center",
-                  padding: "12px 24px",
-                  background: "linear-gradient(135deg, #10b981, #059669)",
-                  borderRadius: 8,
-                  textDecoration: "none",
-                  color: "white",
-                  fontSize: "1rem",
-                  fontWeight: 600
-                }}
-              >
-                💾 Save Meme
-              </a>
-              <button
-                onClick={() => {
-                  setShowCatMemeModal(false);
-                  setShowCatMemePrompt(false);
-                }}
-                style={{
-                  flex: 1,
-                  padding: "12px 24px",
-                  background: "#6b7280",
-                  color: "white",
-                  border: "none",
-                  borderRadius: 8,
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  cursor: "pointer"
-                }}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CatImageModal
+        open={showCatMemeModal}
+        src={currentCatMeme}
+        onClose={() => {
+          setShowCatMemeModal(false);
+          setShowCatMemePrompt(false);
+          if (redirectAfterModalRef.current) {
+            redirectAfterModalRef.current = false;
+            router.push('/progress');
+          }
+        }}
+      />
     </main>
   );
 }

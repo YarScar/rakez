@@ -39,9 +39,9 @@ export default function WhyPage() {
           <h2>🎯 What the App Will Do (Features)</h2>
           <div className="feature-grid">
             <div className="card feature-card">
-              <div className="title">🎵 Finger Music</div>
-              <p><strong>Interactive:</strong> Tap gestures trigger sounds. Create rhythms and melodies through hand movements.</p>
-              <p style={{ fontSize: "0.875rem", marginTop: 8, color: "var(--muted)" }}><strong>Purpose:</strong> Creative expression reduces anxiety</p>
+              <div className="title">🎂 Birthday Cake Candles</div>
+              <p><strong>Interactive:</strong> Pinch to grab and place candles on a cake. Quick, tactile, and rewarding.</p>
+              <p style={{ fontSize: "0.875rem", marginTop: 8, color: "var(--muted)" }}><strong>Purpose:</strong> Brief tactile interaction to reset attention</p>
             </div>
 
             <div className="card feature-card">
@@ -179,7 +179,7 @@ export default function WhyPage() {
                   <strong>Core Features (Week 3-4)</strong>
                   <ul style={{ marginTop: 8, lineHeight: 1.8, color: "var(--muted)" }}>
                     <li>Integrate MediaPipe hand tracking</li>
-                    <li>Build 2-3 hand activities (Finger Music, Calming Flow)</li>
+                    <li>Build 2-3 hand activities (Birthday Cake Candles, Calming Flow)</li>
                     <li>Implement activity completion and scoring</li>
                   </ul>
                 </div>

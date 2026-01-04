@@ -5,9 +5,9 @@ export default function FeaturesPage() {
   
   const activities = [
     {
-      icon: "🎵",
-      name: "Finger Music",
-      description: "Tap rhythms and create melodies with gesture-based sound triggers. Perfect for creative expression.",
+      icon: "🎂",
+      name: "Birthday Cake Candles",
+      description: "Pinch to place candles on a cake — quick, playful, and rewarding hand interaction.",
       color: "--primary"
     },
     {

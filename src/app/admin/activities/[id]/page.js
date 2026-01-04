@@ -9,7 +9,7 @@ export default function ActivityEditor({ params }) {
   
   const [form, setForm] = useState({
     name: "",
-    type: "FINGER_MUSIC",
+    type: "CALMING_FLOW",
     description: "",
     difficulty: 3,
     duration: 30,
@@ -52,7 +52,7 @@ export default function ActivityEditor({ params }) {
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="e.g., Finger Music"
+                placeholder="e.g., Birthday Cake Candles"
                 required
               />
             </div>
@@ -60,7 +60,7 @@ export default function ActivityEditor({ params }) {
             <div>
               <label>Type</label>
               <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
-                <option value="FINGER_MUSIC">Finger Music</option>
+                <option value="CAKE_CANDLES">Birthday Cake Candles</option>
                 <option value="CALMING_FLOW">Calming Flow</option>
                 <option value="ENERGY_BOOST">Energy Boost</option>
                 <option value="GAME">Cognitive Game</option>
@@ -157,7 +157,7 @@ export default function ActivityEditor({ params }) {
               textAlign: "center"
             }}>
               <div style={{ fontSize: "2rem", marginBottom: 12 }}>
-                {form.type === "FINGER_MUSIC" ? "🎵" :
+                {form.type === "CAKE_CANDLES" ? "🎂" :
                  form.type === "CALMING_FLOW" ? "🌊" :
                  form.type === "ENERGY_BOOST" ? "⚡" :
                  form.type === "GAME" ? "🧩" : "🎨"}

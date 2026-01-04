@@ -58,7 +58,7 @@ By connecting mind and body, Rakez makes mental and emotional training enjoyable
    - CTA: `Continue to Features`
 
 4. **Features Page**
-   - Finger Music, Calming Flow, Energy Boost, Cognitive Games
+   - Birthday Cake Candles, Calming Flow, Energy Boost, Cognitive Games
    - Expressive Play, AI guidance, Task tracking, Achievements
    - Admin role-based access
    - CTA: `Create Account`
@@ -88,7 +88,7 @@ By connecting mind and body, Rakez makes mental and emotional training enjoyable
    - Activity header: Name + instructions
    - Main content: Webcam feed, hand detection status, gesture visualization
    - Activity-specific UI:
-     - Finger Music → sound buttons  
+   - Birthday Cake Candles → pinch & place candles  
      - Calming Flow → breathing animation  
      - Energy → speed meter & bursts  
      - Games → pattern display  

@@ -1,96 +1,107 @@
 "use client";
-import { useEffect } from "react";
+import React from "react";
 
-/**
- * Modal component for displaying cat images with prompt
- * @param {Object} props
- * @param {boolean} props.showPrompt - Show the prompt to view image
- * @param {boolean} props.showModal - Show the modal with image
- * @param {string} props.currentImage - URL of the current cat image
- * @param {Function} props.onYes - Callback when user clicks Yes
- * @param {Function} props.onNo - Callback when user clicks No
- * @param {Function} props.onClose - Callback when user closes modal
- */
-export default function CatImageModal({ 
-  showPrompt, 
-  showModal, 
-  currentImage, 
-  onYes, 
-  onNo, 
-  onClose 
-}) {
-  useEffect(() => {
-    if (showModal || showPrompt) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [showModal, showPrompt]);
+export default function CatImageModal({ open, src, onClose, saveFilename }) {
+  if (!open || !src) return null;
 
-  if (!showPrompt && !showModal) return null;
+  const filename = saveFilename || `rakez-cat-reward-${Date.now()}.png`;
 
   return (
-    <>
-      {/* Prompt Modal */}
-      {showPrompt && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
-            <h3 className="text-2xl font-bold mb-4 text-gray-800">🎉 Great Job!</h3>
-            <p className="text-gray-600 mb-6">
-              Would you like to see a random cat image as a reward?
-            </p>
-            <div className="flex gap-4">
-              <button
-                onClick={onYes}
-                className="flex-1 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-semibold"
-              >
-                Yes, Show Me! 🐱
-              </button>
-              <button
-                onClick={onNo}
-                className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition font-semibold"
-              >
-                No Thanks
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: "rgba(0, 0, 0, 0.8)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 2000,
+        padding: 20
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "white",
+          borderRadius: 16,
+          padding: 24,
+          maxWidth: 500,
+          width: "100%",
+          maxHeight: "90vh",
+          overflow: "auto",
+          position: "relative"
+        }}
+      >
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            background: "#ef4444",
+            color: "white",
+            border: "none",
+            borderRadius: 8,
+            width: 32,
+            height: 32,
+            fontSize: "1.2rem",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}
+        >
+          ×
+        </button>
 
-      {/* Image Modal */}
-      {showModal && currentImage && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-2xl relative">
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
-              aria-label="Close"
-            >
-              ×
-            </button>
-            <h3 className="text-2xl font-bold mb-4 text-gray-800">Your Reward! 🐱</h3>
-            <div className="relative w-full h-96 mb-4 rounded-lg overflow-hidden bg-gray-100">
-              <img
-                src={currentImage}
-                alt="Cat reward"
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  e.target.src = '/cat-memes/image.png'; // Fallback image
-                }}
-              />
-            </div>
-            <button
-              onClick={onClose}
-              className="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition font-semibold"
-            >
-              Thanks! 😊
-            </button>
-          </div>
+        <h2 style={{ marginBottom: 16, color: "#1f2937" }}>🎉 Your Image Reward!</h2>
+        <img
+          src={src}
+          alt="Cat Image Reward"
+          style={{ width: "100%", borderRadius: 12, marginBottom: 16 }}
+        />
+
+        <div style={{ display: "flex", gap: 12 }}>
+          <a
+            href={src}
+            download={filename}
+            style={{
+              flex: 1,
+              textAlign: "center",
+              padding: "12px 24px",
+              background: "linear-gradient(135deg, #10b981, #059669)",
+              borderRadius: 8,
+              textDecoration: "none",
+              color: "white",
+              fontSize: "1rem",
+              fontWeight: 600
+            }}
+          >
+            💾 Save Image
+          </a>
+          <button
+            onClick={onClose}
+            style={{
+              flex: 1,
+              padding: "12px 24px",
+              background: "#6b7280",
+              color: "white",
+              border: "none",
+              borderRadius: 8,
+              fontSize: "1rem",
+              fontWeight: 600,
+              cursor: "pointer"
+            }}
+          >
+            Close
+          </button>
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 }
+

@@ -197,7 +197,7 @@ export default async function RubricPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ fontSize: "1.5rem" }}>3️⃣</span>
                 <div style={{ flex: 1 }}>
-                  <Link href="/activities/finger_music" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
+                  <Link href="/activities" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
                     Hand Activity Pages (Interactive Tools)
                     <span>→</span>
                   </Link>

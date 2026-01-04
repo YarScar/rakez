@@ -5,7 +5,6 @@ import BackButton from "@/components/BackButton";
 const demoActivities = [
   { name: "Note Match Challenge", type: "note_match", description: "Match musical notes with hand gestures" },
   { name: "Birthday Cake Candles", type: "cake_candles", description: "Pinch to place candles on a cake" },
-  { name: "Finger Music", type: "finger_music", description: "Tap gestures to play sounds" },
   { name: "Calming Flow", type: "calming_flow", description: "Breathing + slow hand motions" },
 ];
 

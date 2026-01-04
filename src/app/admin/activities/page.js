@@ -4,8 +4,8 @@ import Link from "next/link";
 
 export default function AdminActivities() {
   const [activities, setActivities] = useState([
-    { id: 1, name: "Finger Music", type: "FINGER_MUSIC", status: "ACTIVE", difficulty: 2, completions: 342 },
-    { id: 2, name: "Calming Flow", type: "CALMING_FLOW", status: "ACTIVE", difficulty: 1, completions: 298 },
+    { id: 1, name: "Calming Flow", type: "CALMING_FLOW", status: "ACTIVE", difficulty: 1, completions: 298 },
+    { id: 2, name: "Birthday Cake Candles", type: "CAKE_CANDLES", status: "ACTIVE", difficulty: 2, completions: 184 },
     { id: 3, name: "Energy Boost", type: "ENERGY_BOOST", status: "ACTIVE", difficulty: 3, completions: 256 },
     { id: 4, name: "Cognitive Games", type: "GAME", status: "ACTIVE", difficulty: 4, completions: 189 },
     { id: 5, name: "Expressive Play", type: "EXPRESSIVE_PLAY", status: "ACTIVE", difficulty: 2, completions: 162 }

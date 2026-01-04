@@ -10,7 +10,7 @@ export default function AdminAnalytics() {
     sessions: 1247,
     avgDuration: 42,
     popularActivities: [
-      { name: "Finger Music", completions: 342, percentage: 87 },
+      { name: "Birthday Cake Candles", completions: 184, percentage: 72 },
       { name: "Calming Flow", completions: 298, percentage: 76 },
       { name: "Energy Boost", completions: 256, percentage: 65 },
       { name: "Cognitive Games", completions: 189, percentage: 48 },
@@ -50,7 +50,7 @@ export default function AdminAnalytics() {
             <label style={{ display: "block", marginBottom: 8, fontSize: "0.875rem" }}>Activity Type</label>
             <select value={activityFilter} onChange={(e) => setActivityFilter(e.target.value)}>
               <option value="all">All Activities</option>
-              <option value="FINGER_MUSIC">Finger Music</option>
+              <option value="CAKE_CANDLES">Birthday Cake Candles</option>
               <option value="CALMING_FLOW">Calming Flow</option>
               <option value="ENERGY_BOOST">Energy Boost</option>
               <option value="GAME">Cognitive Games</option>
