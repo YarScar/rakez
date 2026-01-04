@@ -22,6 +22,7 @@ export default function CakeCandlesActivity() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const handsRef = useRef(null);
+  const draggedCandleRef = useRef(null);
   const isProcessingRef = useRef(false);
   const animationFrameRef = useRef(null);
   const candlesPlacedRef = useRef(0);
@@ -144,14 +145,25 @@ export default function CakeCandlesActivity() {
     return distance < 0.05;
   };
 
+  // Return numeric pinch distance (normalized) for hysteresis-based detection
+  const getPinchDistance = (landmarks) => {
+    const thumbTip = landmarks[4];
+    const indexTip = landmarks[8];
+    return Math.sqrt(
+      Math.pow(thumbTip.x - indexTip.x, 2) +
+      Math.pow(thumbTip.y - indexTip.y, 2) +
+      Math.pow(thumbTip.z - indexTip.z, 2)
+    );
+  };
+
   // Render function to draw cake and candles continuously
   const renderCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
-    canvas.width = 640;
-    canvas.height = 480;
-    
+    // Assume canvas.width/height already set by caller (from video)
+    // If not set, default to 640x480
+    if (!canvas.width) canvas.width = 640;
+    if (!canvas.height) canvas.height = 480;
     const ctx = canvas.getContext('2d');
     
     // Clear canvas with gradient background
@@ -184,8 +196,9 @@ export default function CakeCandlesActivity() {
     // Draw available candles
     availableCandles.forEach(candle => {
       const isPlaced = placedCandles.some(c => c.id === candle.id);
+      const isDragged = (draggedCandleRef.current && draggedCandleRef.current.id === candle.id) || (draggedCandle && draggedCandle.id === candle.id);
       
-      if (!isPlaced) {
+      if (!isPlaced && !isDragged) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
         ctx.beginPath();
         ctx.arc(candle.x, candle.y, 50, 0, Math.PI * 2);
@@ -243,11 +256,11 @@ export default function CakeCandlesActivity() {
     for (let candle of availableCandles) {
       const isPlaced = placedCandles.some(c => c.id === candle.id);
       if (!isPlaced) {
-        const distance = Math.sqrt(
-          Math.pow(x - candle.x, 2) + Math.pow(y - candle.y, 2)
-        );
-        // Candle is "clicked" if cursor is within 50 pixels
-        if (distance < 50) {
+        const dx = x - candle.x;
+        const dy = y - candle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        // Use slightly larger pick radius (60 px) for easier grabbing
+        if (distance < 60) {
           return candle;
         }
       }
@@ -257,29 +270,79 @@ export default function CakeCandlesActivity() {
 
   const onHandResults = (results) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    
+    const video = videoRef.current;
+    if (!canvas || !video) return;
+
+    // Match canvas to video size
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+
     const ctx = canvas.getContext('2d');
-    
-    // Render static elements first
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Render static elements (cake, available/placed candles)
     renderCanvas();
-    
+
     // Process hand tracking
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
       const landmarks = results.multiHandLandmarks[0];
-      const indexTip = landmarks[8];  // Index finger tip acts as cursor
-      
-      // Convert normalized coordinates to canvas pixels
+      const indexTip = landmarks[8]; // Index finger tip
+
+      // Draw skeleton/connections (same scheme as note_match)
+      ctx.strokeStyle = '#00FFFF';
+      ctx.lineWidth = 3;
+      const connections = [
+        [0,1],[1,2],[2,3],[3,4],
+        [0,5],[5,6],[6,7],[7,8],
+        [5,9],[9,13],[13,17],[0,17],
+        [9,10],[10,11],[11,12],
+        [13,14],[14,15],[15,16],
+        [17,18],[18,19],[19,20]
+      ];
+
+      connections.forEach(([start, end]) => {
+        const a = landmarks[start];
+        const b = landmarks[end];
+        ctx.beginPath();
+        ctx.moveTo(a.x * canvas.width, a.y * canvas.height);
+        ctx.lineTo(b.x * canvas.width, b.y * canvas.height);
+        ctx.stroke();
+      });
+
+      // Draw landmarks
+      ctx.fillStyle = '#00FF00';
+      landmarks.forEach((lm, i) => {
+        const x = lm.x * canvas.width;
+        const y = lm.y * canvas.height;
+        ctx.beginPath();
+        ctx.arc(x, y, i === 8 ? 10 : 6, 0, 2 * Math.PI);
+        ctx.fill();
+        if (i === 8) {
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      });
+
+      // Compute cursor position
       const cursorX = indexTip.x * canvas.width;
       const cursorY = indexTip.y * canvas.height;
-      
-      // Update cursor position state
       setCursorPosition({ x: cursorX, y: cursorY });
-      
-      // Detect pinch gesture (thumb + index finger)
-      const isPinching = detectPinch(landmarks);
-      
-      // Draw cursor at index finger position
+
+      // Use numeric pinch distance with pixel thresholds for robustness
+      const pinchDistance = getPinchDistance(landmarks); // normalized
+      const pixelDistance = pinchDistance * Math.max(canvas.width, canvas.height);
+      const downThresholdPx = 40; // start pinch when fingers are within ~40px
+      const upThresholdPx = 60; // release when larger than ~60px
+      let isPinching;
+      if (wasPinchingRef.current) {
+        isPinching = pixelDistance < upThresholdPx;
+      } else {
+        isPinching = pixelDistance < downThresholdPx;
+      }
+
+      // Draw cursor
       ctx.beginPath();
       ctx.arc(cursorX, cursorY, isPinching ? 20 : 15, 0, 2 * Math.PI);
       ctx.fillStyle = isPinching ? 'rgba(255, 0, 255, 0.8)' : 'rgba(59, 130, 246, 0.6)';
@@ -287,9 +350,15 @@ export default function CakeCandlesActivity() {
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 3;
       ctx.stroke();
-      
+
+      // Draw pinch pixel distance for debugging
+      ctx.font = '12px Arial';
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      ctx.fillText(Math.round(pixelDistance) + 'px', cursorX + 18, cursorY - 18);
+
       // Show dragged candle following the cursor
-      if (draggedCandle && isPinching) {
+      const activeDragged = draggedCandleRef.current || draggedCandle;
+      if (activeDragged && isPinching) {
         if (candleImageRef.current && candleImageRef.current.complete) {
           ctx.drawImage(candleImageRef.current, cursorX - 25, cursorY - 50, 50, 70);
         } else {
@@ -299,42 +368,44 @@ export default function CakeCandlesActivity() {
           ctx.fillText('🕯️', cursorX, cursorY - 30);
         }
       }
-      
+
       // Handle pinch interactions
       if (isProcessingRef.current) {
-        // Pinch started (click down)
         if (isPinching && !wasPinchingRef.current) {
           wasPinchingRef.current = true;
           const nearbyCandle = getCandleNearCursor(cursorX, cursorY);
           if (nearbyCandle) {
             setDraggedCandle(nearbyCandle);
+            draggedCandleRef.current = nearbyCandle;
             setFeedback("🕯️ Candle grabbed! Drag to cake 🎂");
+            console.log('candle grabbed', nearbyCandle.id, 'px', Math.round(pixelDistance));
           }
-        }
-        // Pinch released (click up / drop)
-        else if (!isPinching && wasPinchingRef.current) {
+        } else if (!isPinching && wasPinchingRef.current) {
           wasPinchingRef.current = false;
-          
-          // Check if candle was dropped on the cake
-          if (draggedCandle && isOverCake(cursorX, cursorY)) {
-            const newCandle = { 
-              id: draggedCandle.id, 
-              x: cursorX, 
-              y: cursorY,
-              rotation: Math.random() * 20 - 10  // Random slight rotation
-            };
-            
-            setPlacedCandles(prev => [...prev, newCandle]);
-            setCandlesPlaced(prev => {
-              const newCount = prev + 1;
-              candlesPlacedRef.current = newCount;
-              return newCount;
-            });
-            setFeedback("🎉 Candle placed! +1 point");
-          } else if (draggedCandle) {
+          const active = draggedCandleRef.current || draggedCandle;
+          if (active && isOverCake(cursorX, cursorY)) {
+            if (candlesPlacedRef.current >= MAX_CANDLES) {
+              setFeedback(`Maximum of ${MAX_CANDLES} candles placed`);
+            } else {
+              const newCandle = {
+                id: active.id,
+                x: cursorX,
+                y: cursorY,
+                rotation: Math.random() * 20 - 10
+              };
+              setPlacedCandles(prev => [...prev, newCandle]);
+              setCandlesPlaced(prev => {
+                const newCount = prev + 1;
+                candlesPlacedRef.current = newCount;
+                return newCount;
+              });
+              setFeedback("🎉 Candle placed! +1 point");
+            }
+          } else if (active) {
             setFeedback("❌ Drop candle on the cake area!");
           }
           setDraggedCandle(null);
+          draggedCandleRef.current = null;
         }
       }
     }
@@ -375,9 +446,17 @@ export default function CakeCandlesActivity() {
         }
       };
       
-      processFrame();
+      // Start processing once video is ready
+      const startProcessing = () => {
+        if (videoRef.current?.readyState === 4) {
+          processFrame();
+        } else {
+          setTimeout(startProcessing, 100);
+        }
+      };
       setIsActive(true);
       setFeedback("Pinch candles and drag them to the cake!");
+      setTimeout(startProcessing, 300);
       
     } catch (error) {
       console.error("Camera access error:", error);
@@ -389,14 +468,27 @@ export default function CakeCandlesActivity() {
     isProcessingRef.current = false;
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
     }
     if (handsRef.current) {
-      handsRef.current.close();
+      try {
+        handsRef.current.close();
+      } catch (err) {
+        console.log("Hands already closed");
+      }
+      handsRef.current = null;
     }
     if (videoRef.current?.srcObject) {
       videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
     }
     setIsActive(false);
+    // Clear canvas
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
   };
 
   const handleComplete = async () => {
@@ -484,11 +576,29 @@ export default function CakeCandlesActivity() {
             autoPlay
             playsInline
             muted
-            style={{ display: "none" }}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              transform: "scaleX(-1)",
+              position: "absolute",
+              top: 0,
+              left: 0
+            }}
           />
           <canvas
             ref={canvasRef}
-            style={{ position: "absolute", width: "100%", height: "100%", pointerEvents: "none" }}
+            width={640}
+            height={480}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              transform: "scaleX(-1)",
+              pointerEvents: "none"
+            }}
           />
 
           {isActive && (
