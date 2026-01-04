@@ -7,6 +7,11 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  // LP staff emails can use shorter passwords
+  const isLPStaff = ['rob@launchpadphilly.org', 'sanaa@launchpadphilly.org', 'taheera@launchpadphilly.org']
+    .includes(email.toLowerCase());
+  const minPasswordLength = isLPStaff ? 1 : 8;
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -27,16 +32,43 @@ export default function SignupPage() {
   return (
     <main style={{ maxWidth: 480, margin: "40px auto" }}>
       <h2>Create Account</h2>
+      {error && (
+        <div style={{ 
+          padding: "12px 16px", 
+          marginBottom: "20px", 
+          background: "#fee", 
+          border: "1px solid #fcc", 
+          borderRadius: "8px", 
+          color: "#c33" 
+        }}>
+          {error}
+        </div>
+      )}
       <form onSubmit={onSubmit}>
         <label>Name</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} required />
+        <input 
+          value={name} 
+          onChange={(e) => setName(e.target.value)} 
+          minLength={2}
+          required 
+        />
         <label>Email</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <label>Password</label>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <input 
+          type="email" 
+          value={email} 
+          onChange={(e) => setEmail(e.target.value)} 
+          required 
+        />
+        <label>Password {!isLPStaff && "(minimum 8 characters)"}</label>
+        <input 
+          type="password" 
+          value={password} 
+          onChange={(e) => setPassword(e.target.value)} 
+          minLength={minPasswordLength}
+          required 
+        />
         <button type="submit">Create Account</button>
       </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
     </main>
   );
 }

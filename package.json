@@ -12,6 +12,7 @@
     "seed": "node scripts/seed-user.js"
   },
   "dependencies": {
+    "@mediapipe/drawing_utils": "^0.3.1675466124",
     "@mediapipe/hands": "^0.4.1675469240",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",

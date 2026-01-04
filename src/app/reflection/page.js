@@ -1,13 +1,26 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { requireRole, Roles } from "@/lib/rbac";
 
-export default function ReflectionPage() {
+export default async function ReflectionPage() {
+  // Check if user has LP_STAFF or ADMIN role
+  const user = await requireRole([Roles.LP_STAFF, Roles.ADMIN]);
+  
+  if (!user) {
+    redirect("/login?message=This page is restricted to LaunchPad staff only");
+  }
+
   return (
-    <main className="container" style={{ maxWidth: 900 }}>
+    <main className="container">
       <section className="hero">
         <div className="stack">
           <h1>🔍 Project Reflection</h1>
-          <p className="subtitle">
-            Looking back at the development process: successes, challenges, pivots, and future vision
+          <p className="subtitle" style={{ fontSize: "1rem", background: "var(--surface)", padding: 16, borderRadius: 12, border: "1px solid var(--border)" }}>
+            <strong>For LaunchPad Instructors:</strong> Looking back at the development process—successes, challenges, 
+            pivots, and future vision. Demonstrates critical thinking and project evolution.
+          </p>
+          <p style={{ fontSize: "0.875rem", color: "var(--muted)", marginTop: 8 }}>
+            👤 Logged in as: <strong>{user.name}</strong> ({user.email})
           </p>
         </div>
       </section>

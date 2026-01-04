@@ -8,8 +8,15 @@ import { prisma } from "@/lib/prisma";
 const SignupSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(1), // Changed to min 1, will validate conditionally below
 });
+
+// LaunchPad staff emails that get LP_STAFF role
+const LP_STAFF_EMAILS = [
+  'rob@launchpadphilly.org',
+  'sanaa@launchpadphilly.org',
+  'taheera@launchpadphilly.org'
+];
 
 export async function POST(req) {
   try {
@@ -24,17 +31,26 @@ export async function POST(req) {
     }
 
     const { name, email, password } = parsed.data;
+    
+    // Check password length - allow any length for LP staff, require 8+ for regular users
+    const isLPStaff = LP_STAFF_EMAILS.includes(email.toLowerCase());
+    if (!isLPStaff && password.length < 8) {
+      return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+    }
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json({ error: "Email already registered" }, { status: 409 });
     }
 
+    // Assign LP_STAFF role to LaunchPad staff emails
+    const role = isLPStaff ? 'LP_STAFF' : 'USER';
+
     const hash = await bcrypt.hash(password, 10);
     let user;
     try {
       user = await prisma.user.create({
-        data: { name, email, password: hash },
+        data: { name, email, password: hash, role },
         select: { id: true, name: true, email: true, role: true },
       });
     } catch (err) {

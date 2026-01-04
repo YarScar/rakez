@@ -106,10 +106,12 @@ model Task {
 enum Role {
   USER
   ADMIN
+  LP_STAFF
 }
 
 enum ActivityType {
   NOTE_MATCH
+  CAKE_CANDLES
   FINGER_MUSIC
   CALMING_FLOW
   ENERGY_BOOST

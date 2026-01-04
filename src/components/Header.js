@@ -61,6 +61,12 @@ export default function Header() {
           <Link href="/why">Why</Link>
           <Link href="/features">Features</Link>
           {user && <Link href="/dashboard">Dashboard</Link>}
+          {user && (user.role === 'LP_STAFF' || user.role === 'ADMIN') && (
+            <>
+              <Link href="/rubric">Rubric Evidence</Link>
+              <Link href="/reflection">Project Reflection</Link>
+            </>
+          )}
         </nav>
 
         <div className="header-auth">

@@ -1,24 +1,7 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
-
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
-
-// Get user from token
-async function getUserFromToken() {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("auth");
-    if (!token) return null;
-
-    const decoded = jwt.verify(token.value, JWT_SECRET);
-    return decoded.sub;
-  } catch (error) {
-    console.error("Auth error:", error);
-    return null;
-  }
-}
+import { getUserFromToken } from "@/lib/auth";
+import { errorResponse, successResponse, handleApiError } from "@/lib/api-helpers";
 
 // GET - Fetch all tasks for the user
 export async function GET() {
@@ -53,15 +36,14 @@ export async function GET() {
     ).length;
     const streak = Math.min(recentCompletions, 7); // Max 7-day streak shown
 
-    return NextResponse.json({
+    return successResponse({
       tasks,
       completedCount,
       points,
       streak,
     });
   } catch (error) {
-    console.error("Get tasks error:", error);
-    return NextResponse.json({ error: "Failed to fetch tasks" }, { status: 500 });
+    return handleApiError(error, "Get tasks");
   }
 }
 
@@ -70,14 +52,14 @@ export async function POST(req) {
   try {
     const userId = await getUserFromToken();
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return errorResponse("Unauthorized", 401);
     }
 
     const body = await req.json();
     const { title, description } = body;
 
     if (!title || title.trim().length === 0) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+      return errorResponse("Title is required", 400);
     }
 
     const task = await prisma.task.create({
@@ -90,10 +72,9 @@ export async function POST(req) {
     });
 
     console.log(`Task created for user ${userId}:`, task.id);
-    return NextResponse.json({ task });
+    return successResponse({ task });
   } catch (error) {
-    console.error("Create task error:", error);
-    return NextResponse.json({ error: "Failed to create task" }, { status: 500 });
+    return handleApiError(error, "Create task");
   }
 }
 
@@ -102,7 +83,7 @@ export async function PATCH(req) {
   try {
     const userId = await getUserFromToken();
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return errorResponse("Unauthorized", 401);
     }
 
     const body = await req.json();
@@ -114,7 +95,7 @@ export async function PATCH(req) {
     });
 
     if (!existingTask) {
-      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+      return errorResponse("Task not found", 404);
     }
 
     // Update task
@@ -159,10 +140,9 @@ export async function PATCH(req) {
       });
     }
 
-    return NextResponse.json({ task, pointsEarned });
+    return successResponse({ task, pointsEarned });
   } catch (error) {
-    console.error("Update task error:", error);
-    return NextResponse.json({ error: "Failed to update task" }, { status: 500 });
+    return handleApiError(error, "Update task");
   }
 }
 

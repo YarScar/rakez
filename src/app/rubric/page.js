@@ -1,13 +1,26 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { requireRole, Roles } from "@/lib/rbac";
 
-export default function RubricPage() {
+export default async function RubricPage() {
+  // Check if user has LP_STAFF or ADMIN role
+  const user = await requireRole([Roles.LP_STAFF, Roles.ADMIN]);
+  
+  if (!user) {
+    redirect("/login?message=This page is restricted to LaunchPad staff only");
+  }
+
   return (
-    <main className="container" style={{ maxWidth: 1000 }}>
+    <main className="container">
       <section className="hero">
         <div className="stack">
-          <h1>📊 Rubric Evidence Page</h1>
-          <p className="subtitle">
-            For LaunchPad Instructors: Clear documentation of CCC criteria with direct links to evidence locations
+          <h1>📊 Rubric Evidence</h1>
+          <p className="subtitle" style={{ fontSize: "1rem", background: "var(--surface)", padding: 16, borderRadius: 12, border: "1px solid var(--border)" }}>
+            <strong>For LaunchPad Instructors:</strong> Clear documentation of CCC criteria (CCC.1.1, CCC.1.2, CCC.1.3) 
+            with direct links to evidence locations in the project.
+          </p>
+          <p style={{ fontSize: "0.875rem", color: "var(--muted)", marginTop: 8 }}>
+            👤 Logged in as: <strong>{user.name}</strong> ({user.email})
           </p>
         </div>
       </section>

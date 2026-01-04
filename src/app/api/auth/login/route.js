@@ -1,13 +1,14 @@
 export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { createToken, setAuthCookie } from "@/lib/auth";
+import { errorResponse, successResponse } from "@/lib/api-helpers";
 
 const LoginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(1), // Allow any length, validate after
 });
 
 export async function POST(req) {
@@ -15,35 +16,34 @@ export async function POST(req) {
     const body = await req.json();
     const parsed = LoginSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+      return errorResponse("Invalid input", 400);
     }
 
     const { email, password } = parsed.data;
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      return errorResponse("Invalid credentials", 401);
     }
 
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      return errorResponse("Invalid credentials", 401);
     }
 
-    const token = jwt.sign({ sub: user.id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = createToken({ sub: user.id, role: user.role });
 
-    const res = NextResponse.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role } });
-    res.cookies.set("auth", token, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
+    const res = successResponse({ 
+      user: { 
+        id: user.id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role 
+      } 
     });
+    setAuthCookie(res, token);
     return res;
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return errorResponse("Server error", 500);
   }
 }
