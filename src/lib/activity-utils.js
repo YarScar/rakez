@@ -20,7 +20,7 @@ export function getRandomEncouragement() {
 export function getRandomCatImage(shownImages, setShownImages) {
   // Generate API image URLs
   const apiImages = Array.from({ length: CAT_IMAGE_SOURCES.API_COUNT }, (_, i) => 
-    `${CAT_IMAGE_SOURCES.API_BASE}?id=${i + 1}&${Date.now()}`
+    `${CAT_IMAGE_SOURCES.API_BASE}?id=${i + 1}`
   );
   
   const allImages = [...CAT_IMAGE_SOURCES.LOCAL, ...apiImages];

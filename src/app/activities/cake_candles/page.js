@@ -533,7 +533,7 @@ export default function CakeCandlesActivity() {
     stopActivity();
     
     const finalScore = candlesPlacedRef.current;
-    const pointsEarned = finalScore * 2;
+    const pointsEarned = finalScore; // 1 point per candle placed
     
     setNotificationTitle(getRandomEncouragement());
     setNotificationMessage(pointsEarned > 0 ? `+${pointsEarned} points earned` : "No points earned this time");

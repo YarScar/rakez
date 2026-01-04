@@ -27,11 +27,11 @@ export function useCatImage() {
     
     // Add 5 API images with unique identifiers
     const apiImages = [
-      `https://cataas.com/cat?id=1&${Date.now()}`,
-      `https://cataas.com/cat?id=2&${Date.now()}`,
-      `https://cataas.com/cat?id=3&${Date.now()}`,
-      `https://cataas.com/cat?id=4&${Date.now()}`,
-      `https://cataas.com/cat?id=5&${Date.now()}`
+      `https://cataas.com/cat?id=1`,
+      `https://cataas.com/cat?id=2`,
+      `https://cataas.com/cat?id=3`,
+      `https://cataas.com/cat?id=4`,
+      `https://cataas.com/cat?id=5`
     ];
     
     const allImages = [...localImages, ...apiImages];

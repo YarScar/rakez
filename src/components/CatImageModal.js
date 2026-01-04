@@ -4,7 +4,7 @@ import React from "react";
 export default function CatImageModal({ open, src, onClose, saveFilename }) {
   if (!open || !src) return null;
 
-  const filename = saveFilename || `rakez-cat-reward-${Date.now()}.png`;
+  const filename = saveFilename || 'rakez-cat-reward.png';
 
   return (
     <div

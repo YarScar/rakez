@@ -493,7 +493,7 @@ export default function TasksPage() {
             <div style={{ display: "flex", gap: 12 }}>
               <a 
                 href={currentCatImage} 
-                download={`rakez-cat-reward-${Date.now()}.png`}
+                download="rakez-cat-reward.png"
                 style={{
                   flex: 1,
                   textAlign: "center",
