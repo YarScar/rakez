@@ -26,18 +26,32 @@ export default function CakeCandlesActivity() {
   const isProcessingRef = useRef(false);
   const animationFrameRef = useRef(null);
   const candlesPlacedRef = useRef(0);
+  const placedIdsRef = useRef(new Set());
   const wasPinchingRef = useRef(false);
   const cakeImageRef = useRef(null);
   const candleImageRef = useRef(null);
 
-  // Available candles state - left side of screen
-  const [availableCandles] = useState([
+  // Available candles state - left side of screen (mutable positions)
+  const [availableCandles, setAvailableCandles] = useState([
     { id: 1, x: 80, y: 120 },
     { id: 2, x: 80, y: 200 },
     { id: 3, x: 80, y: 280 },
     { id: 4, x: 80, y: 360 }
   ]);
   const [placedCandles, setPlacedCandles] = useState([]);
+
+  // Refs to hold latest candle arrays so MediaPipe callback (stable reference)
+  // can read up-to-date positions without relying on React closure updates.
+  const availableCandlesRef = useRef(availableCandles);
+  const placedCandlesRef = useRef(placedCandles);
+
+  useEffect(() => {
+    availableCandlesRef.current = availableCandles;
+  }, [availableCandles]);
+
+  useEffect(() => {
+    placedCandlesRef.current = placedCandles;
+  }, [placedCandles]);
 
   const MAX_CANDLES = 4;
   // Cake area - centered on screen
@@ -193,9 +207,9 @@ export default function CakeCandlesActivity() {
       ctx.fillText('🎂', CAKE_AREA.x + CAKE_AREA.width/2, CAKE_AREA.y + CAKE_AREA.height/2);
     }
     
-    // Draw available candles
-    availableCandles.forEach(candle => {
-      const isPlaced = placedCandles.some(c => c.id === candle.id);
+    // Draw available candles (read from ref to reflect latest positions inside callback)
+    (availableCandlesRef.current || []).forEach(candle => {
+      const isPlaced = (placedCandlesRef.current || []).some(c => c.id === candle.id);
       const isDragged = (draggedCandleRef.current && draggedCandleRef.current.id === candle.id) || (draggedCandle && draggedCandle.id === candle.id);
       
       if (!isPlaced && !isDragged) {
@@ -225,8 +239,8 @@ export default function CakeCandlesActivity() {
       }
     });
     
-    // Draw placed candles on cake
-    placedCandles.forEach(candle => {
+    // Draw placed candles on cake (use ref for latest)
+    (placedCandlesRef.current || []).forEach(candle => {
       ctx.save();
       ctx.translate(candle.x, candle.y);
       ctx.rotate((candle.rotation * Math.PI) / 180);
@@ -253,16 +267,16 @@ export default function CakeCandlesActivity() {
 
   const getCandleNearCursor = (x, y) => {
     // Check if cursor is near any available (not yet placed) candle
-    for (let candle of availableCandles) {
-      const isPlaced = placedCandles.some(c => c.id === candle.id);
-      if (!isPlaced) {
-        const dx = x - candle.x;
-        const dy = y - candle.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        // Use slightly larger pick radius (60 px) for easier grabbing
-        if (distance < 60) {
-          return candle;
-        }
+    const list = availableCandlesRef.current || [];
+    const placed = new Set((placedCandlesRef.current || []).map(c => c.id));
+    for (let candle of list) {
+      if (placed.has(candle.id)) continue;
+      const dx = x - candle.x;
+      const dy = y - candle.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      // Use slightly larger pick radius (60 px) for easier grabbing
+      if (distance < 60) {
+        return candle;
       }
     }
     return null;
@@ -383,29 +397,39 @@ export default function CakeCandlesActivity() {
         } else if (!isPinching && wasPinchingRef.current) {
           wasPinchingRef.current = false;
           const active = draggedCandleRef.current || draggedCandle;
-          if (active && isOverCake(cursorX, cursorY)) {
-            if (candlesPlacedRef.current >= MAX_CANDLES) {
-              setFeedback(`Maximum of ${MAX_CANDLES} candles placed`);
+          if (active) {
+            if (isOverCake(cursorX, cursorY)) {
+              if (candlesPlacedRef.current >= MAX_CANDLES) {
+                setFeedback(`Maximum of ${MAX_CANDLES} candles placed`);
+              } else if (placedIdsRef.current.has(active.id)) {
+                setFeedback('Candle already placed');
+              } else {
+                const newCandle = {
+                  id: active.id,
+                  x: cursorX,
+                  y: cursorY,
+                  rotation: Math.random() * 20 - 10
+                };
+                // lock on cake
+                placedIdsRef.current.add(active.id);
+                setPlacedCandles(prev => [...prev, newCandle]);
+                setCandlesPlaced(prev => {
+                  const newCount = prev + 1;
+                  candlesPlacedRef.current = newCount;
+                  return newCount;
+                });
+                // remove from available candles so it no longer moves
+                setAvailableCandles(prev => prev.filter(c => c.id !== active.id));
+                setFeedback('🎉 Candle placed! +1 point');
+              }
             } else {
-              const newCandle = {
-                id: active.id,
-                x: cursorX,
-                y: cursorY,
-                rotation: Math.random() * 20 - 10
-              };
-              setPlacedCandles(prev => [...prev, newCandle]);
-              setCandlesPlaced(prev => {
-                const newCount = prev + 1;
-                candlesPlacedRef.current = newCount;
-                return newCount;
-              });
-              setFeedback("🎉 Candle placed! +1 point");
+              // Persist new position for the available candle
+              setAvailableCandles(prev => prev.map(c => c.id === active.id ? { ...c, x: cursorX, y: cursorY } : c));
+              setFeedback('Candle moved to new position');
             }
-          } else if (active) {
-            setFeedback("❌ Drop candle on the cake area!");
+            setDraggedCandle(null);
+            draggedCandleRef.current = null;
           }
-          setDraggedCandle(null);
-          draggedCandleRef.current = null;
         }
       }
     }
