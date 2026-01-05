@@ -6,10 +6,7 @@ export default function AboutPage() {
       <section className="hero">
         <div className="stack">
           <h1>📋 About: The Problem</h1>
-          <p className="subtitle" style={{ fontSize: "1rem", background: "var(--surface)", padding: 16, borderRadius: 12, border: "1px solid var(--border)" }}>
-            <strong>CCC.1.1 Evidence:</strong> This page demonstrates problem understanding through real-world scenarios, 
-            constraints analysis, and existing solution evaluation.
-          </p>
+          
         </div>
       </section>
 

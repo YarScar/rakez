@@ -159,6 +159,30 @@ button:focus-visible {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
+/* Reusable clear-primary style (used by modal and small action links) */
+.clear-primary,
+.clear-primary:link,
+.clear-primary:visited {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  height: 40px;
+  min-width: 64px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(37,99,235,0.12);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  text-decoration: none;
+}
+.clear-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(37,99,235,0.16);
+}
+
 /* Cards grid */
 .card-grid {
   display: grid;

@@ -46,47 +46,22 @@ export default async function RubricPage() {
             constraint analysis, and evaluation of existing solutions.
           </p>
 
-          <div style={{ background: "var(--surface)", padding: 20, borderRadius: 12, marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 16 }}>📍 Where to See This Evidence:</h3>
-            <div style={{ display: "grid", gap: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontSize: "1.5rem" }}>1️⃣</span>
-                <div style={{ flex: 1 }}>
-                  <Link href="/about" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
-                    About Page (Primary Evidence)
-                    <span>→</span>
-                  </Link>
-                  <p style={{ fontSize: "0.875rem", color: "var(--muted)", marginTop: 8 }}>
-                    Complete problem analysis with real-life scenarios, constraints, and existing solution evaluation
-                  </p>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ fontSize: "1.5rem" }}>2️⃣</span>
-                <div style={{ flex: 1 }}>
-                  <a href="https://github.com/yourusername/rakez/blob/main/README.md#overview" target="_blank" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
-                    README - Overview Section
-                    <span>↗</span>
-                  </a>
-                  <p style={{ fontSize: "0.875rem", color: "var(--muted)", marginTop: 8 }}>
-                    Technical problem statement and user research findings
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          
 
           <div style={{ background: "var(--surface-elevated)", padding: 20, borderRadius: 12 }}>
-            <h4 style={{ marginBottom: 12 }}>✅ Evidence Includes:</h4>
-            <ul style={{ lineHeight: 2 }}>
-              <li>Problem definition in my own words</li>
-              <li>4 real-life scenarios showing how problem affects students</li>
-              <li>Personal example from my experience last semester</li>
-              <li>5 specific constraints (time, resources, skills, tech, adoption)</li>
-              <li>Analysis of what happens if problem isn't solved</li>
-              <li>Evaluation of Calm app (what worked vs. what didn't)</li>
-            </ul>
+            <h4 style={{ marginBottom: 12 }}>✅ CCC.1.1 Evidence</h4>
+            <p style={{ marginTop: 8, color: 'var(--muted)', lineHeight: 1.7 }}>
+              This page demonstrates problem understanding through real-world scenarios, constraints analysis, and existing solution evaluation.
+            </p>
+
+            <h5 style={{ marginTop: 12, marginBottom: 8 }}>What is the Problem?</h5>
+            <p style={{ color: 'var(--muted)', lineHeight: 1.7 }}>
+              Students and young professionals are mentally exhausted from constant academic pressure, screen fatigue, and information overload. Traditional stress-relief methods require dedicated time and effort, making them feel like another obligation rather than a solution. When you're stuck on a problem or feeling overwhelmed, you need an instant mental reset—but meditation takes practice, exercise requires motivation, and breaks feel unproductive.
+            </p>
+
+            <div style={{ marginTop: 12 }}>
+              <Link href="/about" className="clear-primary" style={{ padding: '8px 14px' }}>View About Page</Link>
+            </div>
           </div>
         </div>
       </section>
@@ -106,10 +81,13 @@ export default async function RubricPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ fontSize: "1.5rem" }}>1️⃣</span>
                 <div style={{ flex: 1 }}>
-                  <Link href="/why" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
-                    Why Rakez Page (Primary Evidence)
-                    <span>→</span>
-                  </Link>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <Link href="/why" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
+                      Why Rakez Page (Primary Evidence)
+                      <span>→</span>
+                    </Link>
+                    <Link href="/why" className="clear-primary" style={{ padding: '6px 10px', fontSize: '0.875rem' }}>View</Link>
+                  </div>
                   <p style={{ fontSize: "0.875rem", color: "var(--muted)", marginTop: 8 }}>
                     Complete solution explanation, 8 features, 5 challenges with solutions, sprint plan
                   </p>
@@ -119,10 +97,13 @@ export default async function RubricPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ fontSize: "1.5rem" }}>2️⃣</span>
                 <div style={{ flex: 1 }}>
-                  <a href="https://github.com/yourusername/rakez/blob/main/README.md#phases--wireframe-flow" target="_blank" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
-                    README - Wireframe Flow
-                    <span>↗</span>
-                  </a>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <a href="https://www.figma.com/design/UfpcWn1DxPe0wy8P6SyDxI/Winter-Assignment?node-id=0-1&t=RMjYmnvw7ro8vY2g-1" target="_blank" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
+                      README - Wireframe Flow
+                      <span>↗</span>
+                    </a>
+                    <a href="https://www.figma.com/design/UfpcWn1DxPe0wy8P6SyDxI/Winter-Assignment?node-id=0-1&t=RMjYmnvw7ro8vY2g-1" target="_blank" className="clear-primary" style={{ padding: '6px 10px', fontSize: '0.875rem' }}>View</a>
+                  </div>
                   <p style={{ fontSize: "0.875rem", color: "var(--muted)", marginTop: 8 }}>
                     Detailed page-by-page wireframes and user flows
                   </p>
@@ -132,10 +113,13 @@ export default async function RubricPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ fontSize: "1.5rem" }}>3️⃣</span>
                 <div style={{ flex: 1 }}>
-                  <a href="https://github.com/yourusername/rakez/blob/main/README.md#tech-stack" target="_blank" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
-                    README - Tech Stack & Architecture
-                    <span>↗</span>
-                  </a>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <a href="https://github.com/YarScar/rakez" target="_blank" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
+                      README - Tech Stack & Architecture
+                      <span>↗</span>
+                    </a>
+                    <a href="https://github.com/YarScar/rakez" target="_blank" className="clear-primary" style={{ padding: '6px 10px', fontSize: '0.875rem' }}>View</a>
+                  </div>
                   <p style={{ fontSize: "0.875rem", color: "var(--muted)", marginTop: 8 }}>
                     Technical implementation plan and database schema
                   </p>
@@ -171,10 +155,13 @@ export default async function RubricPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ fontSize: "1.5rem" }}>1️⃣</span>
                 <div style={{ flex: 1 }}>
-                  <Link href="/features" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
-                    Features Page (Feature Overview)
-                    <span>→</span>
-                  </Link>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <Link href="/features" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
+                      Features Page (Feature Overview)
+                      <span>→</span>
+                    </Link>
+                    <Link href="/features" className="clear-primary" style={{ padding: '6px 10px', fontSize: '0.875rem' }}>View</Link>
+                  </div>
                   <p style={{ fontSize: "0.875rem", color: "var(--muted)", marginTop: 8 }}>
                     Why choose this solution, how AI helps, competitive advantages
                   </p>
@@ -184,10 +171,13 @@ export default async function RubricPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ fontSize: "1.5rem" }}>2️⃣</span>
                 <div style={{ flex: 1 }}>
-                  <Link href="/dashboard" className="button primary" style={{ width: "100%", justifyContent: "space-between" }}>
-                    Product/Dashboard (LIVE APP)
-                    <span>→</span>
-                  </Link>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <Link href="/dashboard" className="button primary" style={{ width: "100%", justifyContent: "space-between" }}>
+                      Product/Dashboard (LIVE APP)
+                      <span>→</span>
+                    </Link>
+                    <Link href="/dashboard" className="clear-primary" style={{ padding: '6px 10px', fontSize: '0.875rem' }}>View</Link>
+                  </div>
                   <p style={{ fontSize: "0.875rem", color: "var(--muted)", marginTop: 8 }}>
                     <strong>Core working product:</strong> Login, survey, dashboard, activities, progress tracking
                   </p>
@@ -197,10 +187,13 @@ export default async function RubricPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ fontSize: "1.5rem" }}>3️⃣</span>
                 <div style={{ flex: 1 }}>
-                  <Link href="/activities" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
-                    Hand Activity Pages (Interactive Tools)
-                    <span>→</span>
-                  </Link>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <Link href="/activities" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
+                      Hand Activity Pages (Interactive Tools)
+                      <span>→</span>
+                    </Link>
+                    <Link href="/activities" className="clear-primary" style={{ padding: '6px 10px', fontSize: '0.875rem' }}>View</Link>
+                  </div>
                   <p style={{ fontSize: "0.875rem", color: "var(--muted)", marginTop: 8 }}>
                     Webcam-based hand tracking with real-time feedback and scoring
                   </p>
@@ -210,10 +203,13 @@ export default async function RubricPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <span style={{ fontSize: "1.5rem" }}>4️⃣</span>
                 <div style={{ flex: 1 }}>
-                  <Link href="/admin" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
-                    Admin Dashboard (Advanced Feature)
-                    <span>→</span>
-                  </Link>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <Link href="/admin" className="button" style={{ width: "100%", justifyContent: "space-between" }}>
+                      Admin Dashboard (Advanced Feature)
+                      <span>→</span>
+                    </Link>
+                    <Link href="/admin" className="clear-primary" style={{ padding: '6px 10px', fontSize: '0.875rem' }}>View</Link>
+                  </div>
                   <p style={{ fontSize: "0.875rem", color: "var(--muted)", marginTop: 8 }}>
                     Analytics, user management, activity editor, audit logs
                   </p>
