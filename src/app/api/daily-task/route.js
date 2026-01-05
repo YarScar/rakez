@@ -50,11 +50,11 @@ export async function GET(req) {
     const userId = await getUserFromToken();
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // Check if a daily bonus task already exists for today
+    // Check if a daily bonus task already exists for today (use UTC boundaries)
     const todayStart = new Date();
-    todayStart.setHours(0,0,0,0);
+    todayStart.setUTCHours(0,0,0,0);
     const todayEnd = new Date();
-    todayEnd.setHours(23,59,59,999);
+    todayEnd.setUTCHours(23,59,59,999);
 
     // Try to generate a task via OpenAI
     let generated = null;
@@ -99,6 +99,24 @@ export async function GET(req) {
         completed: false
       }
     });
+
+    // Immediately check for duplicates created by concurrent requests within the same UTC day.
+    const duplicates = await prisma.task.findMany({
+      where: {
+        userId,
+        title: generated.title,
+        createdAt: { gte: todayStart, lte: todayEnd }
+      },
+      orderBy: { createdAt: 'asc' }
+    });
+
+    if (duplicates.length > 1) {
+      // Keep the earliest one and remove the others to avoid duplicates
+      const keeper = duplicates[0];
+      const remove = duplicates.slice(1).map(d => d.id);
+      await prisma.task.deleteMany({ where: { id: { in: remove } } });
+      return NextResponse.json({ task: keeper, created: keeper.id === task.id });
+    }
 
     return NextResponse.json({ task, created: true });
   } catch (e) {
