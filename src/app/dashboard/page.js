@@ -2,10 +2,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import DailyTaskModal from "@/components/DailyTaskModal";
 
 export default function DashboardPage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
+  const [dailyTask, setDailyTask] = useState(null);
+  const [showDaily, setShowDaily] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -22,6 +25,19 @@ export default function DashboardPage() {
           throw new Error(json.error || "Failed to load");
         }
         setData(json);
+        // after loading dashboard, request the daily task
+        try {
+          const t = await fetch('/api/daily-task');
+          if (t.ok) {
+            const tj = await t.json();
+            if (tj?.task) {
+              setDailyTask(tj.task);
+              setShowDaily(true);
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
       } catch (e) {
         setError(e.message);
       }
@@ -51,6 +67,7 @@ export default function DashboardPage() {
   };
 
   return (
+    <>
     <main style={{ maxWidth: 960, margin: "40px auto", padding: 24 }}>
       <style>{`
         .button-link {
@@ -102,7 +119,11 @@ export default function DashboardPage() {
           </Link>
         </div>
       </section>
-    </main>
+      </main>
+      {showDaily && dailyTask && (
+        <DailyTaskModal task={dailyTask} onClose={() => setShowDaily(false)} />
+      )}
+    </>
   );
 }
 

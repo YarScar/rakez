@@ -99,6 +99,8 @@ export default function ActivityCompletePage() {
         </div>
       </section>
 
+      
+
       {/* Progress Comparison */}
       {stats && (
         <section style={{ marginTop: 32 }}>

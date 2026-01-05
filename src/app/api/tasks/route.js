@@ -107,11 +107,18 @@ export async function PATCH(req) {
       },
     });
 
-    // Calculate points earned (10 points per task)
-    const pointsEarned = completed && !existingTask.completed ? 10 : 0;
+    // Calculate points earned (default 10 points per task)
+    let pointsPerTask = 10;
+    if (existingTask.description) {
+      const m = existingTask.description.match(/BONUS:(\d+)/i);
+      if (m) {
+        pointsPerTask = parseInt(m[1], 10) || pointsPerTask;
+      }
+    }
+    const pointsEarned = completed && !existingTask.completed ? pointsPerTask : 0;
 
     // Update user points if task was just completed
-    if (pointsEarned > 0) {
+      if (pointsEarned > 0) {
       const updatedUser = await prisma.user.update({
         where: { id: userId },
         data: {
@@ -133,7 +140,7 @@ export async function PATCH(req) {
         where: { id: userId },
         data: {
           points: {
-            decrement: 10,
+            decrement: pointsPerTask,
           },
           // Note: We do NOT decrement tasksCompleted - it only goes up
         },
