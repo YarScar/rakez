@@ -1,15 +1,12 @@
 "use client";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function ActivityCompletePage() {
-  const searchParams = useSearchParams();
   const [stats, setStats] = useState(null);
-  
-  const activityName = searchParams.get("activity") || "Activity";
-  const points = searchParams.get("points") || "50";
-  const duration = searchParams.get("duration") || "30";
+  const [activityName, setActivityName] = useState("Activity");
+  const [points, setPoints] = useState("50");
+  const [duration, setDuration] = useState("30");
 
   useEffect(() => {
     // Confetti or celebration animation could go here
@@ -21,6 +18,14 @@ export default function ActivityCompletePage() {
       });
     }, 500);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    setActivityName(params.get("activity") || "Activity");
+    setPoints(params.get("points") || "50");
+    setDuration(params.get("duration") || "30");
   }, []);
 
   const funFacts = [
