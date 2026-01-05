@@ -50,23 +50,25 @@ export default function DailyTaskModal({ task, onClose }) {
 
             <div style={{ marginTop: 12 }}>
               <label style={{ display: 'block', marginBottom: 8 }}>Ask me about this task</label>
-              <input
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="e.g. How should I pace this?"
-                style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid var(--border)' }}
-              />
-              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                <button className="button primary" onClick={doAsk} disabled={loading}>
-                  {loading ? 'Asking…' : 'Ask'}
-                </button>
-                <button className="button" onClick={() => { setQuestion(''); setAnswer(null); }}>
+              <div className="ask-row">
+                <input
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doAsk(); } }}
+                  placeholder="e.g. How should I pace this?"
+                  className="ask-input"
+                />
+                <button
+                  className="button clear-primary"
+                  onClick={() => { setQuestion(''); setAnswer(null); }}
+                  aria-label="Clear question"
+                >
                   Clear
                 </button>
               </div>
 
               {answer && (
-                <div style={{ marginTop: 12, background: 'var(--surface)', padding: 12, borderRadius: 8 }}>
+                <div className="answer-box">
                   <strong>Answer:</strong>
                   <p style={{ marginTop: 8 }}>{answer}</p>
                 </div>
@@ -103,6 +105,52 @@ export default function DailyTaskModal({ task, onClose }) {
           border-radius: 10px;
         }
         .daily-modal :global(.button) { min-width: 90px; }
+
+        /* Ask row styling */
+        .ask-row {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+        }
+        .ask-input {
+          flex: 1;
+          padding: 10px 14px;
+          border-radius: 10px;
+          border: 1px solid var(--border);
+          background: var(--surface);
+          box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+          height: 44px;
+          box-sizing: border-box;
+          transition: box-shadow 120ms, border-color 120ms;
+        }
+        .ask-input:focus {
+          outline: none;
+          border-color: rgba(59,130,246,0.9);
+          box-shadow: 0 4px 18px rgba(37,99,235,0.12);
+        }
+        .clear-primary {
+          background: linear-gradient(135deg, var(--primary), var(--accent));
+          color: white;
+          border: none;
+          padding: 0 16px;
+          height: 44px;
+          border-radius: 10px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 6px 18px rgba(37,99,235,0.12);
+          cursor: pointer;
+          transition: transform 120ms ease, box-shadow 120ms ease;
+        }
+        .clear-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(37,99,235,0.16); }
+
+        .answer-box {
+          margin-top: 12px;
+          background: var(--surface);
+          padding: 12px;
+          border-radius: 8px;
+          border: 1px solid var(--border);
+        }
       `}</style>
     </div>
   );
