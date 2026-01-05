@@ -109,11 +109,20 @@ export default function DailyTaskModal({ task, onClose }) {
                       onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doAsk(); } }}
                       placeholder="e.g. How should I pace this?"
                       className="ask-input"
+                      disabled={loading}
                     />
+                    {/* Themed loading spinner */}
+                    {loading && (
+                      <div className="spinner" aria-hidden="true"></div>
+                    )}
+                    {/* announce loading to assistive tech */}
+                    {loading && <span className="sr-only" role="status">Loading answer…</span>}
+
                     <button
                       className="button clear-primary"
                       onClick={() => { setQuestion(''); setAnswer(null); }}
                       aria-label="Clear question"
+                      disabled={loading}
                     >
                       Clear
                     </button>
@@ -252,6 +261,23 @@ export default function DailyTaskModal({ task, onClose }) {
         .answer-box h1, .answer-box h2, .answer-box h3 { margin: 8px 0 10px; }
         .answer-box ul { margin: 8px 0 12px; padding-left: 20px; }
         .answer-box li { margin-bottom: 6px; }
+
+        /* Loading spinner (themed) */
+        .spinner {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          border: 3px solid rgba(0,0,0,0.08);
+          border-top-color: var(--primary);
+          animation: spin 800ms linear infinite;
+          margin-left: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Visually hidden for screen readers */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+        .button[disabled], .ask-input[disabled] { opacity: 0.6; pointer-events: none; }
 
         /* Bot button */
         .bot-button {
