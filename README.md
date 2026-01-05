@@ -1,3 +1,79 @@
+# Rakez
+
+Rakez is a hand-tracking interactive web app built with Next.js that blends sensorimotor activities, gamification, and light AI to help users practice focus, calm, and creativity.
+
+## Highlights
+- Hand-tracking activities using MediaPipe (Birthday Cake Candles, Note Match, Calming Flow).
+- Daily AI-backed bonus task generated server-side and shown in a dashboard modal with an "ask" endpoint for follow-up questions.
+- Safe Markdown rendering for AI answers via `react-markdown` + `rehype-sanitize` + `remark-gfm`.
+- Persistence with Prisma + PostgreSQL; migrations live under `prisma/migrations`.
+
+## Key Features & Where to Find Them
+- Cake Candles (pinch-to-grab & drag, persistence, points): [src/app/activities/cake_candles/page.js](src/app/activities/cake_candles/page.js)
+- Note Match (musical note matching + audio): [src/app/activities/note_match/page.js](src/app/activities/note_match/page.js)
+- Calming Flow (breathing + gentle movement): [src/app/activities/calming_flow/page.js](src/app/activities/calming_flow/page.js)
+- Daily AI task API: [src/app/api/daily-task/route.js](src/app/api/daily-task/route.js)
+- Daily task "ask" endpoint: [src/app/api/daily-task/ask/route.js](src/app/api/daily-task/ask/route.js)
+- Daily task modal / minimized widget: [src/components/DailyTaskModal.js](src/components/DailyTaskModal.js)
+- Reusable cat image modal: [src/components/CatImageModal.js](src/components/CatImageModal.js)
+- Prisma client helper: [src/lib/prisma.js](src/lib/prisma.js)
+- API helpers and activity utilities: [src/lib/api-helpers.js](src/lib/api-helpers.js), [src/lib/activity-utils.js](src/lib/activity-utils.js)
+
+## Important Files
+- `package.json` — scripts & dependencies: [package.json](package.json)
+- App entry & pages: [src/app](src/app)
+- API routes: [src/app/api](src/app/api)
+- Prisma schema & migrations: [prisma/schema.prisma](prisma/schema.prisma), [prisma/migrations](prisma/migrations)
+- ESLint config: [eslint.config.mjs](eslint.config.mjs)
+
+## Environment Variables
+- `DATABASE_URL` — Postgres connection string used by Prisma
+- `OPENAI_API_KEY` — optional; required for AI-powered endpoints (`/api/daily-task` and `/api/daily-task/ask`)
+
+## Local Development
+1. Install dependencies
+```bash
+npm install
+```
+2. Create a `.env` file with at least:
+```
+DATABASE_URL=postgresql://... 
+OPENAI_API_KEY=sk-...
+```
+3. Run Prisma migrations (adjust for your environment/provider):
+```bash
+npx prisma migrate deploy
+```
+4. Optional: seed demo users
+```bash
+node scripts/seed-user.js
+node scripts/seed-lp-staff.js
+```
+5. Start development server
+```bash
+npm run dev
+```
+
+## Linting
+Run ESLint autofix:
+```bash
+npm run lint -- --ext .js,.jsx,.ts,.tsx src --fix
+```
+
+## Notes & Current Status
+- Daily tasks are created server-side and deduplicated per UTC day; see [src/app/api/daily-task/route.js](src/app/api/daily-task/route.js).
+- AI responses are sanitized and rendered as Markdown in the modal component.
+- The `FINGER_MUSIC` activity was removed from the UI; a safe Prisma migration to remove the enum value is staged in `prisma/migrations`.
+- Camera-based activities require a secure context (localhost or HTTPS).
+
+## Next Steps I Can Help With
+- Start dev server and smoke-test activities (requires webcam access).
+- Finish any remaining lint/cleanup tasks (convert `<img>` to `next/image`, remove unused code).
+- Add DB uniqueness constraint for daily tasks if you want enforced DB-level dedupe.
+
+---
+
+If you'd like the README shortened, expanded, or tailored for contributors or admins, tell me which audience to target and I'll update it.
 # 🖐️ Rakez
 
 **Rakez** is a hand-based interactive app designed to improve focus, creativity, and emotional well-being through playful, sensorimotor exercises. Using hand tracking technology, users engage in fun activities that are personalized, gamified, and mentally beneficial.
