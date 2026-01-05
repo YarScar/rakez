@@ -31,13 +31,7 @@ export default function ActivityCompletePage() {
     "Regular hand exercises improve both mental and physical dexterity. 🎯"
   ];
 
-  const [randomFact, setRandomFact] = useState('');
-
-  useEffect(() => {
-    // Choose a random fact on the client only to avoid SSR hydration mismatches
-    const fact = funFacts[Math.floor(Math.random() * funFacts.length)];
-    setRandomFact(fact);
-  }, []);
+  const [randomFact] = useState(() => funFacts[Math.floor(Math.random() * funFacts.length)]);
 
   return (
     <main className="container" style={{ maxWidth: 700, padding: "40px 24px", textAlign: "center" }}>

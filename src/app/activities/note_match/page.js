@@ -1,8 +1,26 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
 import CatImageModal from "@/components/CatImageModal";
+
+const ENCOURAGING_MESSAGES_NOTE_MATCH = [
+  "Amazing Work!",
+  "You're Crushing It!",
+  "Fantastic Job!",
+  "Keep It Up!",
+  "You're On Fire!",
+  "Incredible!",
+  "Outstanding!",
+  "Brilliant!",
+  "Excellent Work!",
+  "You're A Star!",
+  "Way To Go!",
+  "Superb!",
+  "Phenomenal!",
+  "You Rock!",
+  "Killing It!"
+];
 
 export default function NoteMatchActivity() {
   const router = useRouter();
@@ -33,30 +51,13 @@ export default function NoteMatchActivity() {
   const scoreRef = useRef(0);
   const redirectAfterModalRef = useRef(false);
 
-  // Encouraging messages for notifications
-  const encouragingMessages = [
-    "Amazing Work!",
-    "You're Crushing It!",
-    "Fantastic Job!",
-    "Keep It Up!",
-    "You're On Fire!",
-    "Incredible!",
-    "Outstanding!",
-    "Brilliant!",
-    "Excellent Work!",
-    "You're A Star!",
-    "Way To Go!",
-    "Superb!",
-    "Phenomenal!",
-    "You Rock!",
-    "Killing It!"
-  ];
+  
 
-  const getRandomEncouragement = () => {
-    return encouragingMessages[Math.floor(Math.random() * encouragingMessages.length)];
-  };
+  const getRandomEncouragement = useCallback(() => {
+    return ENCOURAGING_MESSAGES_NOTE_MATCH[Math.floor(Math.random() * ENCOURAGING_MESSAGES_NOTE_MATCH.length)];
+  }, []);
 
-  const getRandomCatMeme = () => {
+  const getRandomCatMeme = useCallback(() => {
     // Combine local images and API images
     const localImages = [
       '/cat-memes/image.png',
@@ -99,7 +100,7 @@ export default function NoteMatchActivity() {
     setShownCatImages(prev => [...prev, imageKey]);
     
     return selectedImage;
-  };
+  }, [shownCatImages]);
 
   // Musical notes frequencies (C major scale)
   const notes = {
@@ -360,7 +361,7 @@ export default function NoteMatchActivity() {
     }
   };
 
-  const handleComplete = async () => {
+  const handleComplete = useCallback(async () => {
     console.log('[Note Match] handleComplete called, finalScore:', scoreRef.current);
     stopActivity();
     
@@ -429,7 +430,7 @@ export default function NoteMatchActivity() {
         router.push("/activities");
       }, 2000);
     }
-  };
+  }, [getRandomEncouragement, getRandomCatMeme, router]);
 
   useEffect(() => {
     if (isActive && timeLeft > 0) {
@@ -444,7 +445,7 @@ export default function NoteMatchActivity() {
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [isActive, timeLeft]);
+  }, [isActive, timeLeft, handleComplete]);
 
   useEffect(() => {
     return () => {

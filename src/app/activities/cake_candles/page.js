@@ -1,8 +1,24 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
 import CatImageModal from "@/components/CatImageModal";
+
+const ENCOURAGING_MESSAGES = [
+  "Amazing Work!",
+  "You're Crushing It!",
+  "Fantastic Job!",
+  "Keep It Up!",
+  "You're On Fire!",
+  "Incredible!",
+  "Outstanding!",
+  "Brilliant!",
+  "Excellent Work!",
+  "You're A Star!"
+];
+
+const MAX_CANDLES = 4;
+const CAKE_AREA = { x: 210, y: 130, width: 200, height: 240 };
 
 export default function CakeCandlesActivity() {
   const router = useRouter();
@@ -57,28 +73,13 @@ export default function CakeCandlesActivity() {
     placedCandlesRef.current = placedCandles;
   }, [placedCandles]);
 
-  const MAX_CANDLES = 4;
-  // Cake area - centered on screen
-  const CAKE_AREA = { x: 210, y: 130, width: 200, height: 240 };
+  
 
-  const encouragingMessages = [
-    "Amazing Work!",
-    "You're Crushing It!",
-    "Fantastic Job!",
-    "Keep It Up!",
-    "You're On Fire!",
-    "Incredible!",
-    "Outstanding!",
-    "Brilliant!",
-    "Excellent Work!",
-    "You're A Star!"
-  ];
+  const getRandomEncouragement = useCallback(() => {
+    return ENCOURAGING_MESSAGES[Math.floor(Math.random() * ENCOURAGING_MESSAGES.length)];
+  }, []);
 
-  const getRandomEncouragement = () => {
-    return encouragingMessages[Math.floor(Math.random() * encouragingMessages.length)];
-  };
-
-  const getRandomCatMeme = () => {
+  const getRandomCatMeme = useCallback(() => {
     const localImages = [
       '/cat-memes/image.png',
       '/cat-memes/image-1.png',
@@ -121,7 +122,7 @@ export default function CakeCandlesActivity() {
     setShownCatImages(prev => [...prev, imageKey]);
     
     return selectedImage;
-  };
+  }, [shownCatImages]);
 
   // Load cake and candle PNG images
   useEffect(() => {
@@ -175,7 +176,7 @@ export default function CakeCandlesActivity() {
   };
 
   // Render function to draw cake and candles continuously
-  const renderCanvas = () => {
+  const renderCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     // Assume canvas.width/height already set by caller (from video)
@@ -214,7 +215,7 @@ export default function CakeCandlesActivity() {
     // Draw available candles (read from ref to reflect latest positions inside callback)
     (availableCandlesRef.current || []).forEach(candle => {
       const isPlaced = (placedCandlesRef.current || []).some(c => c.id === candle.id);
-      const isDragged = (draggedCandleRef.current && draggedCandleRef.current.id === candle.id) || (draggedCandle && draggedCandle.id === candle.id);
+      const isDragged = (draggedCandleRef.current && draggedCandleRef.current.id === candle.id);
       
       if (!isPlaced && !isDragged) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
@@ -260,7 +261,8 @@ export default function CakeCandlesActivity() {
       }
       ctx.restore();
     });
-  };
+  }, []);
+
 
   const isOverCake = (x, y) => {
     return x >= CAKE_AREA.x && 
@@ -501,8 +503,7 @@ export default function CakeCandlesActivity() {
       setFeedback("Camera access denied");
     }
   };
-
-  const stopActivity = () => {
+  const stopActivity = useCallback(() => {
     isProcessingRef.current = false;
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -527,9 +528,9 @@ export default function CakeCandlesActivity() {
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-  };
+  }, []);
 
-  const handleComplete = async () => {
+  const handleComplete = useCallback(async () => {
     stopActivity();
     
     const finalScore = candlesPlacedRef.current;
@@ -560,7 +561,7 @@ export default function CakeCandlesActivity() {
     } catch (error) {
       console.error("Failed to save activity:", error);
     }
-  };
+  }, [getRandomEncouragement, getRandomCatMeme, stopActivity]);
 
   useEffect(() => {
     if (isActive && timeLeft > 0) {
@@ -573,18 +574,18 @@ export default function CakeCandlesActivity() {
     if (timeLeft === 0 && isActive) {
       handleComplete();
     }
-  }, [isActive, timeLeft]);
+  }, [isActive, timeLeft, handleComplete]);
 
   // Render canvas when images load or state changes
   useEffect(() => {
     renderCanvas();
-  }, [availableCandles, placedCandles, cakeImageRef.current, candleImageRef.current]);
+  }, [availableCandles, placedCandles, renderCanvas]);
 
   useEffect(() => {
     return () => {
       stopActivity();
     };
-  }, []);
+  }, [stopActivity]);
 
   return (
     <main style={{ minHeight: "100vh", background: "var(--background)", paddingBottom: 60 }}>
@@ -594,7 +595,7 @@ export default function CakeCandlesActivity() {
         <div style={{ textAlign: "center", marginBottom: 20 }}>
           <h1 style={{ fontSize: "2rem", marginBottom: 8 }}>🎂 Birthday Cake Candles</h1>
           <p style={{ fontSize: "0.9rem", color: "var(--muted)" }}>
-            Pinch and drag candles onto the cake!
+            Pinch and drag candles onto the cake using your hand! (put your hand in front of camera)
           </p>
         </div>
 

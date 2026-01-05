@@ -483,30 +483,37 @@ export default function DemoPage() {
   };
 
   useEffect(() => {
+    // Capture current ref values to avoid stale-ref lint warnings
+    const af = animationFrameRef.current;
+    const vr = videoRef.current;
+    const si = scoreIntervalRef.current;
+    const ti = timerIntervalRef.current;
+    const hr = handsRef.current;
+
     return () => {
       // Cleanup on unmount
       isProcessingRef.current = false;
-      
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+
+      if (af) {
+        cancelAnimationFrame(af);
       }
-      
-      if (videoRef.current?.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
+
+      if (vr?.srcObject) {
+        const tracks = vr.srcObject.getTracks();
         tracks.forEach(track => track.stop());
       }
-      
-      if (scoreIntervalRef.current) {
-        clearInterval(scoreIntervalRef.current);
+
+      if (si) {
+        clearInterval(si);
       }
-      
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
+
+      if (ti) {
+        clearInterval(ti);
       }
-      
-      if (handsRef.current) {
+
+      if (hr) {
         try {
-          handsRef.current.close();
+          hr.close();
         } catch (err) {
           // Ignore cleanup errors
         }

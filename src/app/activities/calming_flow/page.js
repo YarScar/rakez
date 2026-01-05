@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
 
@@ -11,6 +11,14 @@ export default function CalmingFlowActivity() {
   const [breathPhase, setBreathPhase] = useState("inhale"); // inhale, hold, exhale
   const [timeLeft, setTimeLeft] = useState(60);
 
+  const handleComplete = useCallback(() => {
+    if (videoRef.current?.srcObject) {
+      const tracks = videoRef.current.srcObject.getTracks();
+      tracks.forEach(track => track.stop());
+    }
+    router.push(`/activities/complete?activity=Calming Flow&points=${score}&duration=60`);
+  }, [router, score]);
+
   useEffect(() => {
     if (isActive && timeLeft > 0) {
       const timer = setInterval(() => {
@@ -20,7 +28,7 @@ export default function CalmingFlowActivity() {
     } else if (timeLeft === 0) {
       handleComplete();
     }
-  }, [isActive, timeLeft]);
+  }, [isActive, timeLeft, handleComplete]);
 
   useEffect(() => {
     if (isActive) {
@@ -48,13 +56,6 @@ export default function CalmingFlowActivity() {
     }
   };
 
-  const handleComplete = () => {
-    if (videoRef.current?.srcObject) {
-      const tracks = videoRef.current.srcObject.getTracks();
-      tracks.forEach(track => track.stop());
-    }
-    router.push(`/activities/complete?activity=Calming Flow&points=${score}&duration=60`);
-  };
 
   const handlePause = () => {
     setIsActive(false);
